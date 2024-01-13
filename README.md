@@ -8,6 +8,7 @@ Visual Studio 2022 , Windows 10/11
 
 ## D3D12 Agility SDK 업데이트
 이 프로젝트는 D3D12 Agility SDK를 사용합니다.  (https://devblogs.microsoft.com/directx/directx12agility/) 
+
 Agility SDK는 NuGet패키지로서 업데이트 됩니다.
 이 프로젝트는 직접적으로 pakage의 바이너리를 포함하지 않습니다. 사용자가 직접 업데이트해야 합니다
 
@@ -26,6 +27,7 @@ Visual Studio 2022 , Windows 10/11
       
 ## Update D3D12 Agility SDK
 This project uses the D3D12 Agility SDK. (https://devblogs.microsoft.com/directx/directx12agility/)
+
 Agility SDK is updated as a NuGet package.
 This project does not directly contain the package's binaries. Users must update themselves
 
