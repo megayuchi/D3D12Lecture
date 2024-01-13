@@ -10,7 +10,7 @@ Visual Studio 2022 , Windows 10/11
 이 프로젝트는 D3D12 Agility SDK를 사용합니다.  (https://devblogs.microsoft.com/directx/directx12agility/) 
 
 Agility SDK는 NuGet패키지로서 업데이트 됩니다.
-이 프로젝트는 직접적으로 pakage의 바이너리를 포함하지 않습니다. 사용자가 직접 업데이트해야 합니다
+이 프로젝트는 직접적으로 D3D12 Core 바이너리를 포함하지 않습니다. 사용자가 직접 업데이트해야 합니다
 
 1. solution explorer의 solution에서 오른쪽 버튼을 누릅니다.
 2. 'Restore NuGet Packages'을 클릭합니다.
