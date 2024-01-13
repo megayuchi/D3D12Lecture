@@ -30,3 +30,5 @@
 *.exe
 *.out
 *.app
+del_not_needed_folder.bat
+update_to_git.bat
