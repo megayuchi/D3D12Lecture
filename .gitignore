@@ -32,3 +32,4 @@
 *.app
 del_not_needed_folder.bat
 update_to_git.bat
+/02_DrawTriangle/02_DrawTriangle/x64

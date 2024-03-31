@@ -243,18 +243,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				EndPaint(hWnd, &ps);
 			}
 			break;
-		case WM_SIZE:
-			{
-				if (g_pRenderer)
-				{
-					RECT	rect;
-					GetClientRect(hWnd, &rect);
-					DWORD	dwWndWidth = rect.right - rect.left;
-					DWORD	dwWndHeight = rect.bottom - rect.top;
-					g_pRenderer->UpdateWindowSize(dwWndWidth, dwWndHeight);
-				}
-			}
-			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
