@@ -26,7 +26,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {AAA11589-AB8A-4A01-B8E5-2EFD2F3ED45A}
+		SolutionGuid = {1767ABC1-290B-4BB0-99C2-6C07E27E58AA}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 1
