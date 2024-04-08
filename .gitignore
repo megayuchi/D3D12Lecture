@@ -33,3 +33,5 @@
 del_not_needed_folder.bat
 update_to_git.bat
 /02_DrawTriangle/02_DrawTriangle/x64
+/01_CreateDevice/01_CreateDevice/x64
+/03_Texture/03_Texture/x64

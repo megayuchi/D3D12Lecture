@@ -15,12 +15,12 @@
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
 
-//extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
+extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // D3D12 Agility SDK Runtime
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 611; }	
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 613; }	
 
 #if defined(_M_ARM64EC)
 	extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\D3D12\\arm64\\"; }
