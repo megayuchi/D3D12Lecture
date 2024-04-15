@@ -78,18 +78,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.</OutDir>
     <TargetName>$(ProjectName)_x64_debug</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.</OutDir>
     <TargetName>$(ProjectName)_x86_debug</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.</OutDir>
     <TargetName>$(ProjectName)_x86_release</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.</OutDir>
     <TargetName>$(ProjectName)_x64_release</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -164,6 +168,7 @@
     <ClInclude Include="..\D3D_Util\d3dx12.h" />
     <ClInclude Include="BasicMeshObject.h" />
     <ClInclude Include="D3D12Renderer.h" />
+    <ClInclude Include="D3D12ResourceManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -173,6 +178,7 @@
     <ClCompile Include="..\D3D_Util\D3DUtil.cpp" />
     <ClCompile Include="BasicMeshObject.cpp" />
     <ClCompile Include="D3D12Renderer.cpp" />
+    <ClCompile Include="D3D12ResourceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -182,10 +188,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="03_Texture.rc" />
+    <ResourceCompile Include="03_DrawTriangle_GPU.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="03_Texture.ico" />
+    <Image Include="03_DrawTriangle_GPU.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

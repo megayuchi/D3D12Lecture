@@ -57,6 +57,9 @@
     <ClInclude Include="typedef.h">
       <Filter>typdef</Filter>
     </ClInclude>
+    <ClInclude Include="D3D12ResourceManager.h">
+      <Filter>D3D12Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,9 +77,12 @@
     <ClCompile Include="BasicMeshObject.cpp">
       <Filter>D3D12Renderer\BasicMeshObject</Filter>
     </ClCompile>
+    <ClCompile Include="D3D12ResourceManager.cpp">
+      <Filter>D3D12Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="03_Texture.rc">
+    <ResourceCompile Include="03_DrawTriangle_GPU.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -84,7 +90,7 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="03_Texture.ico">
+    <Image Include="03_DrawTriangle_GPU.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

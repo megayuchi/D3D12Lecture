@@ -158,6 +158,8 @@ lb_exit:
 	m_ScissorRect.right = dwWndWidth;
 	m_ScissorRect.bottom = dwWndHeight;
 
+	m_dwWidth = dwWndWidth;
+	m_dwHeight = dwWndHeight;
 
 	// Create frame resources.
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart());
@@ -198,6 +200,73 @@ lb_return:
 	return bResult;
 }
 
+
+BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBufferHeight)
+{
+	BOOL	bResult = FALSE;
+
+	if (!(dwBackBufferWidth * dwBackBufferHeight))
+		return FALSE;
+
+	if (m_dwWidth == dwBackBufferWidth && m_dwHeight == dwBackBufferHeight)
+		return FALSE;
+	//WaitForFenceValue();
+
+	/*
+	if (FAILED(m_pCommandAllocator->Reset()))
+		__debugbreak();
+
+	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator,nullptr)))
+		__debugbreak();
+
+	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiFrameIndex, m_rtvDescriptorSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
+
+	m_pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+	*/
+
+
+	DXGI_SWAP_CHAIN_DESC1	desc;
+	HRESULT	hr = m_pSwapChain->GetDesc1(&desc);
+	if (FAILED(hr))
+		__debugbreak();
+
+	for (UINT n = 0; n < SWAP_CHAIN_FRAME_COUNT; n++)
+	{
+		m_pRenderTargets[n]->Release();
+		m_pRenderTargets[n] = nullptr;
+	}
+
+	if (FAILED(m_pSwapChain->ResizeBuffers(SWAP_CHAIN_FRAME_COUNT, dwBackBufferWidth, dwBackBufferHeight, DXGI_FORMAT_R8G8B8A8_UNORM, m_dwSwapChainFlags)))
+	{
+		__debugbreak();
+	}
+	m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+
+	// Create frame resources.
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart());
+
+	// Create a RTV for each frame.
+	for (UINT n = 0; n < SWAP_CHAIN_FRAME_COUNT; n++)
+	{
+		m_pSwapChain->GetBuffer(n, IID_PPV_ARGS(&m_pRenderTargets[n]));
+		m_pD3DDevice->CreateRenderTargetView(m_pRenderTargets[n], nullptr, rtvHandle);
+		rtvHandle.Offset(1, m_rtvDescriptorSize);
+	}
+	m_dwWidth = dwBackBufferWidth;
+	m_dwHeight = dwBackBufferHeight;
+	m_Viewport.Width = m_dwWidth;
+	m_Viewport.Height = m_dwHeight;
+	m_ScissorRect.left = 0;
+	m_ScissorRect.top = 0;
+	m_ScissorRect.right = m_dwWidth;
+	m_ScissorRect.bottom = m_dwHeight;
+
+
+	return TRUE;
+}
 void CD3D12Renderer::BeginRender()
 {
 	//

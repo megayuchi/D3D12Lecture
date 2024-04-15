@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "typedef.h"
 #include <d3dcompiler.h>
+#include "D3D12ResourceManager.h"
 #include "D3D12Renderer.h"
 #include "BasicMeshObject.h"
 
@@ -8,10 +9,6 @@
 ID3D12RootSignature* CBasicMeshObject::m_pRootSignature = nullptr;
 ID3D12PipelineState* CBasicMeshObject::m_pPipelineState = nullptr;
 DWORD CBasicMeshObject::m_dwInitRefCount = 0;
-
-// 1) 고정된 위치에 삼각형 렌더링
-// 2) CONSTANTBUFFER를 이용해서 위치 변경
-// 3) 텍스처링
 
 CBasicMeshObject::CBasicMeshObject()
 {
@@ -130,7 +127,9 @@ BOOL CBasicMeshObject::InitPipelineState()
 }
 BOOL CBasicMeshObject::CreateMesh()
 {
+	BOOL bResult = FALSE;
 	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
 
 	// Create the vertex buffer.
 	// Define the geometry for a triangle.
@@ -143,38 +142,15 @@ BOOL CBasicMeshObject::CreateMesh()
 
 	const UINT VertexBufferSize = sizeof(Vertices);
 
-	// Note: using upload heaps to transfer static data like vert buffers is not 
-	// recommended. Every time the GPU needs it, the upload heap will be marshalled 
-	// over. Please read up on Default Heap usage. An upload heap is used here for 
-	// code simplicity and because there are very few verts to actually transfer.
-	if (FAILED(pD3DDeivce->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(VertexBufferSize),
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&m_pVertexBuffer))))
+	if (FAILED(pResourceManager->CreateVertexBuffer(sizeof(BasicVertex), (DWORD)_countof(Vertices), &m_VertexBufferView, &m_pVertexBuffer, Vertices)))
 	{
 		__debugbreak();
+		goto lb_return;
 	}
+	bResult = TRUE;
 
-	// Copy the triangle data to the vertex buffer.
-	UINT8* pVertexDataBegin = nullptr;
-	CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-
-	if (FAILED(m_pVertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin))))
-	{
-		__debugbreak();
-	}
-	memcpy(pVertexDataBegin, Vertices, sizeof(Vertices));
-	m_pVertexBuffer->Unmap(0, nullptr);
-
-	// Initialize the vertex buffer view.
-	m_VertexBufferView.BufferLocation = m_pVertexBuffer->GetGPUVirtualAddress();
-	m_VertexBufferView.StrideInBytes = sizeof(BasicVertex);
-	m_VertexBufferView.SizeInBytes = VertexBufferSize;
-
-	return TRUE;
+lb_return:
+	return bResult;
 }
 void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList)
 {

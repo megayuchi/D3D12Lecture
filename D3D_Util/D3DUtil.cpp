@@ -78,3 +78,38 @@ void SetDebugLayerInfo(ID3D12Device* pD3DDevice)
 		pInfoQueue = nullptr;
 	}
 }
+
+
+HRESULT CreateVertexBuffer(ID3D12Device* pDevice, UINT SizePerVertex, DWORD dwVertexNum, D3D12_VERTEX_BUFFER_VIEW* pOutVertexBufferView, ID3D12Resource **ppOutBuffer)
+{
+	HRESULT hr = S_OK;
+
+	D3D12_VERTEX_BUFFER_VIEW	VertexBufferView = {};
+	ID3D12Resource*	pVertexBuffer = nullptr;
+	UINT		VertexBufferSize = SizePerVertex * dwVertexNum;
+
+	// create vertexbuffer for rendering
+	hr = pDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(VertexBufferSize),
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&pVertexBuffer));
+
+	if (FAILED(hr))
+	{
+		goto lb_return;
+	}
+
+	// Initialize the vertex buffer view.
+	VertexBufferView.BufferLocation = pVertexBuffer->GetGPUVirtualAddress();
+	VertexBufferView.StrideInBytes = SizePerVertex;
+	VertexBufferView.SizeInBytes = VertexBufferSize;
+
+	*pOutVertexBufferView = VertexBufferView;
+	*ppOutBuffer = pVertexBuffer;
+
+lb_return:
+	return hr;
+}
