@@ -165,7 +165,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\D3D_Util\D3DUtil.h" />
-    <ClInclude Include="..\D3D_Util\d3dx12.h" />
     <ClInclude Include="..\Util\LinkedList.h" />
     <ClInclude Include="BasicMeshObject.h" />
     <ClInclude Include="D3D12Renderer.h" />

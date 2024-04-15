@@ -12,9 +12,6 @@
     <Filter Include="pch">
       <UniqueIdentifier>{e840e59c-40e8-4380-86f6-6abe8d53abfe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="D3D12Renderer">
-      <UniqueIdentifier>{1acb9a89-c9d7-4b16-998f-b070c9d3c4e9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="typdef">
       <UniqueIdentifier>{927795c1-677b-4eae-aa5f-6e5e1679f8f0}</UniqueIdentifier>
     </Filter>
@@ -22,17 +19,23 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="D3D_Util">
-      <UniqueIdentifier>{bbcb9b35-68ba-4301-89c2-648344eccc7f}</UniqueIdentifier>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{2471f182-752e-48c9-81a7-6dcc865ae2ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{de92f6d6-11c8-4499-9a1e-ae7ad4cbdfac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12Renderer">
+      <UniqueIdentifier>{1acb9a89-c9d7-4b16-998f-b070c9d3c4e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\BasicMeshObject">
+      <UniqueIdentifier>{ea76df91-95f0-4203-a218-ce44184b7427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\ResrouceManager">
+      <UniqueIdentifier>{6a132869-f3f2-4bf0-91fc-addc49b7d4a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader">
       <UniqueIdentifier>{7dd6429e-0777-4324-806d-9db02eba2478}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="BasicMeshObject">
-      <UniqueIdentifier>{ea76df91-95f0-4203-a218-ce44184b7427}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ResrouceManager">
-      <UniqueIdentifier>{6a132869-f3f2-4bf0-91fc-addc49b7d4a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -46,22 +49,19 @@
       <Filter>pch</Filter>
     </ClInclude>
     <ClInclude Include="D3D12Renderer.h">
-      <Filter>D3D12Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\D3D_Util\D3DUtil.h">
-      <Filter>D3D_Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\D3D_Util\d3dx12.h">
-      <Filter>D3D_Util</Filter>
+      <Filter>Renderer\D3D12Renderer</Filter>
     </ClInclude>
     <ClInclude Include="BasicMeshObject.h">
-      <Filter>BasicMeshObject</Filter>
+      <Filter>Renderer\BasicMeshObject</Filter>
     </ClInclude>
     <ClInclude Include="typedef.h">
       <Filter>typdef</Filter>
     </ClInclude>
     <ClInclude Include="D3D12ResourceManager.h">
-      <Filter>ResrouceManager</Filter>
+      <Filter>Renderer\ResrouceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\D3D_Util\D3DUtil.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -72,16 +72,16 @@
       <Filter>pch</Filter>
     </ClCompile>
     <ClCompile Include="D3D12Renderer.cpp">
-      <Filter>D3D12Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\D3D_Util\D3DUtil.cpp">
-      <Filter>D3D_Util</Filter>
+      <Filter>Renderer\D3D12Renderer</Filter>
     </ClCompile>
     <ClCompile Include="BasicMeshObject.cpp">
-      <Filter>BasicMeshObject</Filter>
+      <Filter>Renderer\BasicMeshObject</Filter>
     </ClCompile>
     <ClCompile Include="D3D12ResourceManager.cpp">
-      <Filter>ResrouceManager</Filter>
+      <Filter>Renderer\ResrouceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\D3D_Util\D3DUtil.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
