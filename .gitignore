@@ -38,3 +38,10 @@ update_to_git.bat
 *.ipch
 *.exp
 /03_Texture/.vs
+*.ilk
+*.log
+*.recipe
+*.tlog
+/02_DrawTriangle_SysMem/Win32
+/03_DrawTriangle_GpuMem/Win32
+/01_CreateDevice/Win32

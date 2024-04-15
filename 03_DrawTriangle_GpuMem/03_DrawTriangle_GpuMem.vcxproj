@@ -166,14 +166,19 @@
   <ItemGroup>
     <ClInclude Include="..\D3D_Util\D3DUtil.h" />
     <ClInclude Include="..\D3D_Util\d3dx12.h" />
+    <ClInclude Include="BasicMeshObject.h" />
     <ClInclude Include="D3D12Renderer.h" />
+    <ClInclude Include="D3D12ResourceManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="typedef.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\D3D_Util\D3DUtil.cpp" />
+    <ClCompile Include="BasicMeshObject.cpp" />
     <ClCompile Include="D3D12Renderer.cpp" />
+    <ClCompile Include="D3D12ResourceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -183,11 +188,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="01_CreateDevice.rc" />
+    <ResourceCompile Include="03_DrawTriangle_GpuMem.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="01_CreateDevice.ico" />
+    <Image Include="03_DrawTriangle_GpuMem.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Shaders\shaders.hlsl">
+      <FileType>Document</FileType>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
