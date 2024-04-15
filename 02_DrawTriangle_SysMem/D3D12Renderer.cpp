@@ -257,8 +257,8 @@ BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBuffe
 	}
 	m_dwWidth = dwBackBufferWidth;
 	m_dwHeight = dwBackBufferHeight;
-	m_Viewport.Width = m_dwWidth;
-	m_Viewport.Height = m_dwHeight;
+	m_Viewport.Width = (float)m_dwWidth;
+	m_Viewport.Height = (float)m_dwHeight;
 	m_ScissorRect.left = 0;
 	m_ScissorRect.top = 0;
 	m_ScissorRect.right = m_dwWidth;
