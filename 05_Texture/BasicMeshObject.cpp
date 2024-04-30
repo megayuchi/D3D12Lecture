@@ -60,7 +60,7 @@ BOOL CBasicMeshObject::InitRootSinagture()
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
-	// Create an empty root signature.
+	// Create an root signature.
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 	//rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	rootSignatureDesc.Init(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
@@ -180,8 +180,6 @@ lb_return:
 }
 BOOL CBasicMeshObject::CreateMesh()
 {
-	// 바깥에서 버텍스데이터와 텍스처를 입력하는 식으로 변경할 것
-
 	BOOL bResult = FALSE;
 	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
@@ -254,7 +252,7 @@ BOOL CBasicMeshObject::CreateMesh()
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Texture2D.MipLevels = 1;
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE srv(m_pDescritorHeap->GetCPUDescriptorHandleForHeapStart(), BASIC_MESH_DESCRIPTOR_INDEX, m_srvDescriptorSize);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE srv(m_pDescritorHeap->GetCPUDescriptorHandleForHeapStart(), BASIC_MESH_DESCRIPTOR_INDEX_TEX, m_srvDescriptorSize);
 		pD3DDeivce->CreateShaderResourceView(m_pTexResource, &SRVDesc, srv);
 	}
 
@@ -274,8 +272,8 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList)
 
 	pCommandList->SetDescriptorHeaps(1, &m_pDescritorHeap);
 
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cpuDescriptorTable(m_pDescritorHeap->GetGPUDescriptorHandleForHeapStart());
-	pCommandList->SetGraphicsRootDescriptorTable(0, cpuDescriptorTable);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable(m_pDescritorHeap->GetGPUDescriptorHandleForHeapStart());
+	pCommandList->SetGraphicsRootDescriptorTable(0, gpuDescriptorTable);
 
 	pCommandList->SetPipelineState(m_pPipelineState);
 	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

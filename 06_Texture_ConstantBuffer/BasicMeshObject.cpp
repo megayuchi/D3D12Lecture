@@ -161,7 +161,7 @@ BOOL CBasicMeshObject::CreateDescriptorTable()
 
 	// 렌더링시 Descriptor Table로 사용할 Descriptor Heap - 
 	// Descriptor Table
-	// | TEX
+	// | CBV | SRV(TEX) |
 	m_srvDescriptorSize = pD3DDeivce->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// create descriptor heap
@@ -286,8 +286,8 @@ BOOL CBasicMeshObject::CreateMesh()
 
         // Map and initialize the constant buffer. We don't unmap this until the
         // app closes. Keeping things mapped for the lifetime of the resource is okay.
-        CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-		if (FAILED(m_pConstantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pSysConstBufferDefault))))
+        CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
+		if (FAILED(m_pConstantBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&m_pSysConstBufferDefault))))
 		{
 			__debugbreak();
 		}
@@ -314,8 +314,8 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMFLO
 
 	pCommandList->SetDescriptorHeaps(1, &m_pDescritorHeap);
 
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cpuDescriptorTable(m_pDescritorHeap->GetGPUDescriptorHandleForHeapStart());
-	pCommandList->SetGraphicsRootDescriptorTable(0, cpuDescriptorTable);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable(m_pDescritorHeap->GetGPUDescriptorHandleForHeapStart());
+	pCommandList->SetGraphicsRootDescriptorTable(0, gpuDescriptorTable);
 
 	pCommandList->SetPipelineState(m_pPipelineState);
 	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
