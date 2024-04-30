@@ -4,6 +4,7 @@
 #include <d3d12.h>
 #include <d3dx12.h>
 #include "../D3D_Util/D3DUtil.h"
+#include "typedef.h"
 #include "D3D12ResourceManager.h"
 
 CD3D12ResourceManager::CD3D12ResourceManager()
@@ -83,9 +84,9 @@ HRESULT CD3D12ResourceManager::CreateVertexBuffer(UINT SizePerVertex, DWORD dwVe
 		
 		// Copy the triangle data to the vertex buffer.
 		UINT8* pVertexDataBegin = nullptr;
-		CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
+		CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
 
-		hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pVertexDataBegin));
+		hr = pUploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin));
 		if (FAILED(hr))
 		{
 			__debugbreak();
@@ -125,6 +126,131 @@ lb_return:
 	return hr;
 }
 
+
+BOOL CD3D12ResourceManager::CreateTexture(ID3D12Resource** ppOutResource, UINT Width, UINT Height, DXGI_FORMAT format, const BYTE* pInitImage)
+{
+	ID3D12Resource*	pTexResource = nullptr;
+	ID3D12Resource*	pUploadBuffer = nullptr;
+
+	D3D12_RESOURCE_DESC textureDesc = {};
+	textureDesc.MipLevels = 1;
+	textureDesc.Format = format;	// ex) DXGI_FORMAT_R8G8B8A8_UNORM, etc...
+	textureDesc.Width = Width;
+	textureDesc.Height = Height;
+	textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+	textureDesc.DepthOrArraySize = 1;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+	if (FAILED(m_pD3DDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&textureDesc,
+		D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE,
+		nullptr,
+		IID_PPV_ARGS(&pTexResource))))
+	{
+		__debugbreak();
+	}
+
+	if (pInitImage)
+	{
+		D3D12_RESOURCE_DESC Desc = pTexResource->GetDesc();
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT Footprint;
+		UINT	Rows = 0;
+		UINT64	RowSize = 0;
+		UINT64	TotalBytes = 0;
+
+		m_pD3DDevice->GetCopyableFootprints(&Desc, 0, 1, 0, &Footprint, &Rows, &RowSize, &TotalBytes);
+
+		BYTE*	pMappedPtr = nullptr;
+		CD3DX12_RANGE writeRange(0, 0);
+
+		UINT64 uploadBufferSize = GetRequiredIntermediateSize(pTexResource, 0, 1);
+
+		if (FAILED(m_pD3DDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&pUploadBuffer))))
+		{
+			__debugbreak();
+		}
+
+		HRESULT hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pMappedPtr));
+		if (FAILED(hr))
+			__debugbreak();
+
+		const BYTE* pSrc = pInitImage;
+		BYTE* pDest = pMappedPtr;
+		for (UINT y = 0; y < Width; y++)
+		{
+			memcpy(pDest, pSrc, Width * 4);
+			pSrc += (Width * 4);
+			pDest += Footprint.Footprint.RowPitch;			
+		}
+		// Unmap
+		pUploadBuffer->Unmap(0, nullptr);
+
+		UpdateTextureForWrite(pTexResource, pUploadBuffer);
+
+		pUploadBuffer->Release();
+		pUploadBuffer = nullptr;
+		
+	}
+	*ppOutResource = pTexResource;
+
+	return TRUE;
+}
+void CD3D12ResourceManager::UpdateTextureForWrite(ID3D12Resource* pDestTexResource, ID3D12Resource* pSrcTexResource)
+{
+	const DWORD MAX_SUB_RESOURCE_NUM = 32;
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT Footprint[MAX_SUB_RESOURCE_NUM] = {};
+	UINT	Rows[MAX_SUB_RESOURCE_NUM] = {};
+	UINT64	RowSize[MAX_SUB_RESOURCE_NUM] = {};
+	UINT64	TotalBytes = 0;
+
+	D3D12_RESOURCE_DESC Desc = pDestTexResource->GetDesc();
+	if (Desc.MipLevels > (UINT)_countof(Footprint))
+		__debugbreak();
+
+	m_pD3DDevice->GetCopyableFootprints(&Desc, 0, Desc.MipLevels, 0, Footprint, Rows, RowSize, &TotalBytes);
+
+	if (FAILED(m_pCommandAllocator->Reset()))
+		__debugbreak();
+
+	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator, nullptr)))
+		__debugbreak();
+
+	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pDestTexResource, D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
+	for (DWORD i = 0; i < Desc.MipLevels; i++)
+	{
+
+		D3D12_TEXTURE_COPY_LOCATION	destLocation = {};
+		destLocation.PlacedFootprint = Footprint[i];
+		destLocation.pResource = pDestTexResource;
+		destLocation.SubresourceIndex = i;
+		destLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+		D3D12_TEXTURE_COPY_LOCATION	srcLocation = {};
+		srcLocation.PlacedFootprint = Footprint[i];
+		srcLocation.pResource = pSrcTexResource;
+		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+
+		m_pCommandList->CopyTextureRegion(&destLocation, 0, 0, 0, &srcLocation, nullptr);
+	}
+	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pDestTexResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE));
+	m_pCommandList->Close();
+
+	ID3D12CommandList* ppCommandLists[] = { m_pCommandList };
+	m_pCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+	Fence();
+	WaitForFenceValue();
+}
 
 UINT64 CD3D12ResourceManager::Fence()
 {
