@@ -41,8 +41,9 @@ BOOL CBasicMeshObject::InitRootSinagture()
 	ID3DBlob* pSignature = nullptr;
 	ID3DBlob* pError = nullptr;
 
-	CD3DX12_DESCRIPTOR_RANGE ranges[1] = {};
-	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);	// t0 : texture
+	CD3DX12_DESCRIPTOR_RANGE ranges[2] = {};
+	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);	// b0 : Constant Buffer View
+	ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);	// t0 : texture
 	
 	CD3DX12_ROOT_PARAMETER rootParameters[1] = {};
 	rootParameters[0].InitAsDescriptorTable(_countof(ranges), ranges, D3D12_SHADER_VISIBILITY_ALL);
@@ -160,7 +161,7 @@ BOOL CBasicMeshObject::CreateDescriptorTable()
 
 	// 렌더링시 Descriptor Table로 사용할 Descriptor Heap - 
 	// Descriptor Table
-	// | TEX
+	// | CBV | SRV(TEX) |
 	m_srvDescriptorSize = pD3DDeivce->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// create descriptor heap
@@ -254,8 +255,44 @@ BOOL CBasicMeshObject::CreateMesh()
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Texture2D.MipLevels = 1;
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE srv(m_pDescritorHeap->GetCPUDescriptorHandleForHeapStart(), BASIC_MESH_DESCRIPTOR_INDEX, m_srvDescriptorSize);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE srv(m_pDescritorHeap->GetCPUDescriptorHandleForHeapStart(), BASIC_MESH_DESCRIPTOR_INDEX_TEX, m_srvDescriptorSize);
 		pD3DDeivce->CreateShaderResourceView(m_pTexResource, &SRVDesc, srv);
+	}
+
+
+	// create constant buffer
+	{
+		// CB size is required to be 256-byte aligned.
+		const UINT AlignSize = 256;
+		UINT UnitCount = sizeof(CONSTANT_BUFFER_DEFAULT) / AlignSize + ((sizeof(CONSTANT_BUFFER_DEFAULT) % AlignSize) != 0);
+		const UINT constantBufferSize = UnitCount * AlignSize;
+
+		if (FAILED(pD3DDeivce->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(constantBufferSize),
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(&m_pConstantBuffer))))
+		{
+			__debugbreak();
+		}
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+        cbvDesc.BufferLocation = m_pConstantBuffer->GetGPUVirtualAddress();
+        cbvDesc.SizeInBytes = constantBufferSize;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE cbv(m_pDescritorHeap->GetCPUDescriptorHandleForHeapStart(), BASIC_MESH_DESCRIPTOR_INDEX_CBV, m_srvDescriptorSize);
+		pD3DDeivce->CreateConstantBufferView(&cbvDesc, cbv);
+
+        // Map and initialize the constant buffer. We don't unmap this until the
+        // app closes. Keeping things mapped for the lifetime of the resource is okay.
+        CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
+		if (FAILED(m_pConstantBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&m_pSysConstBufferDefault))))
+		{
+			__debugbreak();
+		}
+		m_pSysConstBufferDefault->offset.x = 0.0f;
+		m_pSysConstBufferDefault->offset.y = 0.0f;
 	}
 
 	// dispatch할때 사용할 common heap에 카피
@@ -267,15 +304,18 @@ BOOL CBasicMeshObject::CreateMesh()
 lb_return:
 	return bResult;
 }
-void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList)
+void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMFLOAT2* pPos)
 {
+	m_pSysConstBufferDefault->offset.x = pPos->x;
+	m_pSysConstBufferDefault->offset.y = pPos->y;
+
 	// set RootSignature
 	pCommandList->SetGraphicsRootSignature(m_pRootSignature);
 
 	pCommandList->SetDescriptorHeaps(1, &m_pDescritorHeap);
 
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cpuDescriptorTable(m_pDescritorHeap->GetGPUDescriptorHandleForHeapStart());
-	pCommandList->SetGraphicsRootDescriptorTable(0, cpuDescriptorTable);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable(m_pDescritorHeap->GetGPUDescriptorHandleForHeapStart());
+	pCommandList->SetGraphicsRootDescriptorTable(0, gpuDescriptorTable);
 
 	pCommandList->SetPipelineState(m_pPipelineState);
 	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -291,6 +331,11 @@ void CBasicMeshObject::Cleanup()
 	{
 		m_pVertexBuffer->Release();
 		m_pVertexBuffer = nullptr;
+	}
+	if (m_pConstantBuffer)
+	{
+		m_pConstantBuffer->Release();
+		m_pConstantBuffer = nullptr;
 	}
 	if (m_pDescritorHeap)
 	{

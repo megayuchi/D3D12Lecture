@@ -193,10 +193,10 @@
     <ClCompile Include="SingleDescriptorAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="04_Texture.rc" />
+    <ResourceCompile Include="05_Texture.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="04_Texture.ico" />
+    <Image Include="05_Texture.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

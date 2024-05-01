@@ -124,6 +124,94 @@ lb_return:
 	}
 	return hr;
 }
+HRESULT CD3D12ResourceManager::CreateIndexBuffer(DWORD dwIndexNum, D3D12_INDEX_BUFFER_VIEW* pOutIndexBufferView, ID3D12Resource **ppOutBuffer, void* pInitData)
+{
+	HRESULT hr = S_OK;
+
+	D3D12_INDEX_BUFFER_VIEW	IndexBufferView = {};
+	ID3D12Resource*	pIndexBuffer = nullptr;
+	ID3D12Resource*	pUploadBuffer = nullptr;
+	UINT		IndexBufferSize = sizeof(WORD) * dwIndexNum;
+
+	// create vertexbuffer for rendering
+	hr = m_pD3DDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(IndexBufferSize),
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&pIndexBuffer));
+
+	if (FAILED(hr))
+	{
+		__debugbreak();
+		goto lb_return;
+	}
+	if (pInitData)
+	{
+		if (FAILED(m_pCommandAllocator->Reset()))
+			__debugbreak();
+
+		if (FAILED(m_pCommandList->Reset(m_pCommandAllocator, nullptr)))
+			__debugbreak();
+
+		hr = m_pD3DDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(IndexBufferSize),
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(&pUploadBuffer));
+
+		if (FAILED(hr))
+		{
+			__debugbreak();
+			goto lb_return;
+		}
+		
+		// Copy the triangle data to the vertex buffer.
+		UINT8* pIndexDataBegin = nullptr;
+		CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
+
+		hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pIndexDataBegin));
+		if (FAILED(hr))
+		{
+			__debugbreak();
+			goto lb_return;
+		}
+		memcpy(pIndexDataBegin, pInitData, IndexBufferSize);
+		pUploadBuffer->Unmap(0, nullptr);
+
+		m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pIndexBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
+		m_pCommandList->CopyBufferRegion(pIndexBuffer, 0, pUploadBuffer, 0, IndexBufferSize);
+		m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pIndexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER));
+
+		m_pCommandList->Close();
+
+		ID3D12CommandList* ppCommandLists[] = { m_pCommandList };
+		m_pCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+		
+		Fence();
+		WaitForFenceValue();
+	}
+	
+
+	// Initialize the vertex buffer view.
+	IndexBufferView.BufferLocation = pIndexBuffer->GetGPUVirtualAddress();
+	IndexBufferView.Format = DXGI_FORMAT_R16_UINT;
+	IndexBufferView.SizeInBytes = IndexBufferSize;
+
+	*pOutIndexBufferView = IndexBufferView;
+	*ppOutBuffer = pIndexBuffer;
+
+lb_return:
+	if (pUploadBuffer)
+	{
+		pUploadBuffer->Release();
+		pUploadBuffer = nullptr;
+	}
+	return hr;
+}
 
 
 UINT64 CD3D12ResourceManager::Fence()

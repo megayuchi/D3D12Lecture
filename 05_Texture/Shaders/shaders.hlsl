@@ -1,5 +1,6 @@
 Texture2D texDiffuse : register(t0);
 SamplerState samplerDiffuse	: register(s0);
+
 struct VSInput
 {
     float4 Pos : POSITION;
@@ -13,7 +14,6 @@ struct PSInput
     float4 color : COLOR;
     float2 TexCoord : TEXCOORD0;
 };
-
 
 PSInput VSMain(VSInput input)
 {

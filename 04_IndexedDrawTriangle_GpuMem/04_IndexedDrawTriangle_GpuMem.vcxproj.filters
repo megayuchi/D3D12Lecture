@@ -19,11 +19,11 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Util">
-      <UniqueIdentifier>{62ad9412-3c0e-4813-92cd-89fc377bfb2a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Renderer">
-      <UniqueIdentifier>{34dfc1c6-a10f-4a68-b344-624bae5aabea}</UniqueIdentifier>
+      <UniqueIdentifier>{2471f182-752e-48c9-81a7-6dcc865ae2ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{de92f6d6-11c8-4499-9a1e-ae7ad4cbdfac}</UniqueIdentifier>
     </Filter>
     <Filter Include="Renderer\D3D12Renderer">
       <UniqueIdentifier>{1acb9a89-c9d7-4b16-998f-b070c9d3c4e9}</UniqueIdentifier>
@@ -31,16 +31,10 @@
     <Filter Include="Renderer\BasicMeshObject">
       <UniqueIdentifier>{ea76df91-95f0-4203-a218-ce44184b7427}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\DescriptorPool">
-      <UniqueIdentifier>{a5259405-1c27-4994-9626-18ba0e86e166}</UniqueIdentifier>
+    <Filter Include="Renderer\ResrouceManager">
+      <UniqueIdentifier>{6a132869-f3f2-4bf0-91fc-addc49b7d4a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\ResourceManager">
-      <UniqueIdentifier>{db080291-6c4f-44ac-b9b6-22458d627024}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\SingleDescriptorAllocator">
-      <UniqueIdentifier>{a8e369d1-2988-4d3b-bc1f-b1a8b1d383b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\Shader">
+    <Filter Include="Shader">
       <UniqueIdentifier>{7dd6429e-0777-4324-806d-9db02eba2478}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -63,17 +57,8 @@
     <ClInclude Include="typedef.h">
       <Filter>typdef</Filter>
     </ClInclude>
-    <ClInclude Include="DescriptorPool.h">
-      <Filter>Renderer\DescriptorPool</Filter>
-    </ClInclude>
     <ClInclude Include="D3D12ResourceManager.h">
-      <Filter>Renderer\ResourceManager</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleDescriptorAllocator.h">
-      <Filter>Renderer\SingleDescriptorAllocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Util\LinkedList.h">
-      <Filter>Util</Filter>
+      <Filter>Renderer\ResrouceManager</Filter>
     </ClInclude>
     <ClInclude Include="..\D3D_Util\D3DUtil.h">
       <Filter>Util</Filter>
@@ -92,24 +77,15 @@
     <ClCompile Include="BasicMeshObject.cpp">
       <Filter>Renderer\BasicMeshObject</Filter>
     </ClCompile>
-    <ClCompile Include="DescriptorPool.cpp">
-      <Filter>Renderer\DescriptorPool</Filter>
-    </ClCompile>
     <ClCompile Include="D3D12ResourceManager.cpp">
-      <Filter>Renderer\ResourceManager</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleDescriptorAllocator.cpp">
-      <Filter>Renderer\SingleDescriptorAllocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Util\LinkedList.cpp">
-      <Filter>Util</Filter>
+      <Filter>Renderer\ResrouceManager</Filter>
     </ClCompile>
     <ClCompile Include="..\D3D_Util\D3DUtil.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="04_Texture.rc">
+    <ResourceCompile Include="04_IndexedDrawTriangle_GpuMem.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -117,13 +93,13 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="04_Texture.ico">
+    <Image Include="04_IndexedDrawTriangle_GpuMem.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Shaders\shaders.hlsl">
-      <Filter>Renderer\Shader</Filter>
+      <Filter>Shader</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
