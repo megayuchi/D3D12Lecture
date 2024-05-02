@@ -37,7 +37,7 @@ lb_true:
 }
 BOOL CBasicMeshObject::InitRootSinagture()
 {
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
 	// Create an empty root signature.
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -69,7 +69,7 @@ BOOL CBasicMeshObject::InitRootSinagture()
 }
 BOOL CBasicMeshObject::InitPipelineState()
 {
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
 	ID3DBlob* pVertexShader = nullptr;
 	ID3DBlob* pPixelShader = nullptr;
@@ -136,7 +136,7 @@ BOOL CBasicMeshObject::CreateMesh()
 	// 바깥에서 버텍스데이터와 텍스처를 입력하는 식으로 변경할 것
 
 	BOOL bResult = FALSE;
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
 
 	// Create the vertex buffer.

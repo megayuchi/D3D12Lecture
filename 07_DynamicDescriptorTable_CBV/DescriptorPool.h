@@ -1,6 +1,6 @@
 #pragma once
 
-class CSingleDescriptorAllocator
+class CDescriptorPool
 {
 	ID3D12Device5*	m_pD3DDevice = nullptr;
 	UINT	m_AllocatedDescriptorCount = 0;
@@ -17,8 +17,8 @@ public:
 	
 	BOOL	AllocDescriptorTable(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCPUDescriptor, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGPUDescriptor, UINT DescriptorCount);
 	void	Reset();
-
-	CSingleDescriptorAllocator();
-	~CSingleDescriptorAllocator();
+	ID3D12DescriptorHeap* INL_GetDescriptorHeap() { return m_pDescritorHeap; }
+	CDescriptorPool();
+	~CDescriptorPool();
 };
 

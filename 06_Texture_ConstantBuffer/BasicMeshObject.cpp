@@ -37,7 +37,7 @@ lb_true:
 }
 BOOL CBasicMeshObject::InitRootSinagture()
 {
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	ID3DBlob* pSignature = nullptr;
 	ID3DBlob* pError = nullptr;
 
@@ -89,7 +89,7 @@ BOOL CBasicMeshObject::InitRootSinagture()
 }
 BOOL CBasicMeshObject::InitPipelineState()
 {
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
 	ID3DBlob* pVertexShader = nullptr;
 	ID3DBlob* pPixelShader = nullptr;
@@ -157,7 +157,7 @@ BOOL CBasicMeshObject::CreateDescriptorTable()
 {
 
 	BOOL bResult = FALSE;
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
 	// 렌더링시 Descriptor Table로 사용할 Descriptor Heap - 
 	// Descriptor Table
@@ -184,7 +184,7 @@ BOOL CBasicMeshObject::CreateMesh()
 	// 바깥에서 버텍스데이터와 텍스처를 입력하는 식으로 변경할 것
 
 	BOOL bResult = FALSE;
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
 
 	// Create the vertex buffer.
@@ -263,9 +263,7 @@ BOOL CBasicMeshObject::CreateMesh()
 	// create constant buffer
 	{
 		// CB size is required to be 256-byte aligned.
-		const UINT AlignSize = 256;
-		UINT UnitCount = sizeof(CONSTANT_BUFFER_DEFAULT) / AlignSize + ((sizeof(CONSTANT_BUFFER_DEFAULT) % AlignSize) != 0);
-		const UINT constantBufferSize = UnitCount * AlignSize;
+		const UINT constantBufferSize = (UINT)AlignConstantBufferSize(sizeof(CONSTANT_BUFFER_DEFAULT));
 
 		if (FAILED(pD3DDeivce->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),

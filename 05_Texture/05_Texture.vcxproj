@@ -169,10 +169,8 @@
     <ClInclude Include="BasicMeshObject.h" />
     <ClInclude Include="D3D12Renderer.h" />
     <ClInclude Include="D3D12ResourceManager.h" />
-    <ClInclude Include="DescriptorPool.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SingleDescriptorAllocator.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="typedef.h" />
   </ItemGroup>
@@ -182,7 +180,6 @@
     <ClCompile Include="BasicMeshObject.cpp" />
     <ClCompile Include="D3D12Renderer.cpp" />
     <ClCompile Include="D3D12ResourceManager.cpp" />
-    <ClCompile Include="DescriptorPool.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -190,7 +187,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="SingleDescriptorAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="05_Texture.rc" />

@@ -167,8 +167,10 @@
     <ClInclude Include="..\D3D_Util\D3DUtil.h" />
     <ClInclude Include="..\Util\LinkedList.h" />
     <ClInclude Include="BasicMeshObject.h" />
+    <ClInclude Include="SimpleConstantBufferPool.h" />
     <ClInclude Include="D3D12Renderer.h" />
     <ClInclude Include="D3D12ResourceManager.h" />
+    <ClInclude Include="DescriptorPool.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -178,8 +180,10 @@
     <ClCompile Include="..\D3D_Util\D3DUtil.cpp" />
     <ClCompile Include="..\Util\LinkedList.cpp" />
     <ClCompile Include="BasicMeshObject.cpp" />
+    <ClCompile Include="SimpleConstantBufferPool.cpp" />
     <ClCompile Include="D3D12Renderer.cpp" />
     <ClCompile Include="D3D12ResourceManager.cpp" />
+    <ClCompile Include="DescriptorPool.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -189,10 +193,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="06_Texture_ConstantBuffer.rc" />
+    <ResourceCompile Include="07_DynamicDescriptorTable_CBV.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="06_Texture_ConstantBuffer.ico" />
+    <Image Include="07_DynamicDescriptorTable_CBV.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

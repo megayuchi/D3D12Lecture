@@ -7,7 +7,6 @@
 #include "../D3D_Util/D3DUtil.h"
 #include "BasicMeshObject.h"
 #include "D3D12ResourceManager.h"
-#include "DescriptorPool.h"
 #include "D3D12Renderer.h"
 
 CD3D12Renderer::CD3D12Renderer()
@@ -187,10 +186,6 @@ lb_exit:
 	m_pResourceManager = new CD3D12ResourceManager;
 	m_pResourceManager->Initialize(m_pD3DDevice);
 
-	m_pDescriptorPool = new CDescriptorPool;
-	m_pDescriptorPool->Initialize(m_pD3DDevice, MAX_DRAW_COUNT_PER_FRAME * DESCRIPTOR_COUNT_FOR_DRAW);
-
-
 	bResult = TRUE;
 lb_return:
 	if (pDebugController)
@@ -350,7 +345,6 @@ void CD3D12Renderer::Present()
 	Fence();
 
 	WaitForFenceValue();
-	m_pDescriptorPool->Reset();
 }
 
 void* CD3D12Renderer::CretateBasicMeshObject()
@@ -474,11 +468,6 @@ void CD3D12Renderer::Cleanup()
 	{
 		delete m_pResourceManager;
 		m_pResourceManager = nullptr;
-	}
-	if (m_pDescriptorPool)
-	{
-		delete m_pDescriptorPool;
-		m_pDescriptorPool = nullptr;
 	}
 
 	CleanupDescriptorHeapForRTV();

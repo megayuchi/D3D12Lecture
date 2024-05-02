@@ -37,11 +37,14 @@
     <Filter Include="Renderer\ResourceManager">
       <UniqueIdentifier>{db080291-6c4f-44ac-b9b6-22458d627024}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\SingleDescriptorAllocator">
-      <UniqueIdentifier>{a8e369d1-2988-4d3b-bc1f-b1a8b1d383b1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Renderer\Shader">
       <UniqueIdentifier>{7dd6429e-0777-4324-806d-9db02eba2478}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\ConstantBufferPool">
+      <UniqueIdentifier>{79d5ad66-0ddc-44dc-b98d-c23e53d6ff09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\NewFilter1">
+      <UniqueIdentifier>{734f5dea-b708-47b5-a21f-6b5cd0bd4b0e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +66,9 @@
     <ClInclude Include="typedef.h">
       <Filter>typdef</Filter>
     </ClInclude>
+    <ClInclude Include="DescriptorPool.h">
+      <Filter>Renderer\DescriptorPool</Filter>
+    </ClInclude>
     <ClInclude Include="D3D12ResourceManager.h">
       <Filter>Renderer\ResourceManager</Filter>
     </ClInclude>
@@ -71,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="..\D3D_Util\D3DUtil.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleConstantBufferPool.h">
+      <Filter>Renderer\ConstantBufferPool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +95,9 @@
     <ClCompile Include="BasicMeshObject.cpp">
       <Filter>Renderer\BasicMeshObject</Filter>
     </ClCompile>
+    <ClCompile Include="DescriptorPool.cpp">
+      <Filter>Renderer\DescriptorPool</Filter>
+    </ClCompile>
     <ClCompile Include="D3D12ResourceManager.cpp">
       <Filter>Renderer\ResourceManager</Filter>
     </ClCompile>
@@ -95,9 +107,12 @@
     <ClCompile Include="..\D3D_Util\D3DUtil.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="SimpleConstantBufferPool.cpp">
+      <Filter>Renderer\ConstantBufferPool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="05_Texture.rc">
+    <ResourceCompile Include="07_DynamicDescriptorTable_CBV.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -105,7 +120,7 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="05_Texture.ico">
+    <Image Include="07_DynamicDescriptorTable_CBV.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

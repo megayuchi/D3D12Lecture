@@ -4,7 +4,6 @@ const UINT SWAP_CHAIN_FRAME_COUNT = 2;
 const UINT MAX_PENDING_FRAME_NUM = SWAP_CHAIN_FRAME_COUNT - 1;
 
 class CD3D12ResourceManager;
-class CDescriptorPool;
 class CD3D12Renderer
 {
 	static const UINT DESCRIPTOR_COUNT_FOR_DRAW = 1;	// | Tex 
@@ -16,7 +15,6 @@ class CD3D12Renderer
 	ID3D12CommandAllocator* m_pCommandAllocator = nullptr;
 	ID3D12GraphicsCommandList* m_pCommandList = nullptr;
 	CD3D12ResourceManager*	m_pResourceManager = nullptr;
-	CDescriptorPool*	m_pDescriptorPool = nullptr;
 
 	D3D_FEATURE_LEVEL	m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
 	DXGI_ADAPTER_DESC1	m_AdapterDesc = {};
@@ -66,7 +64,6 @@ public:
 	// for internal
 	ID3D12Device5* INL_GetD3DDevice() const { return m_pD3DDevice; }
 	CD3D12ResourceManager*	INL_GetResourceManager() { return m_pResourceManager; }
-	CDescriptorPool*	INL_GetDescriptorPool() { return m_pDescriptorPool; }
 	CD3D12Renderer();
 	~CD3D12Renderer();
 };

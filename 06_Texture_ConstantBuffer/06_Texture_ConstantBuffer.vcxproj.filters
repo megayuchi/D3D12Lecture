@@ -31,14 +31,8 @@
     <Filter Include="Renderer\BasicMeshObject">
       <UniqueIdentifier>{ea76df91-95f0-4203-a218-ce44184b7427}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\DescriptorPool">
-      <UniqueIdentifier>{a5259405-1c27-4994-9626-18ba0e86e166}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Renderer\ResourceManager">
       <UniqueIdentifier>{db080291-6c4f-44ac-b9b6-22458d627024}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\SingleDescriptorAllocator">
-      <UniqueIdentifier>{a8e369d1-2988-4d3b-bc1f-b1a8b1d383b1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Renderer\Shader">
       <UniqueIdentifier>{7dd6429e-0777-4324-806d-9db02eba2478}</UniqueIdentifier>
@@ -63,14 +57,8 @@
     <ClInclude Include="typedef.h">
       <Filter>typdef</Filter>
     </ClInclude>
-    <ClInclude Include="DescriptorPool.h">
-      <Filter>Renderer\DescriptorPool</Filter>
-    </ClInclude>
     <ClInclude Include="D3D12ResourceManager.h">
       <Filter>Renderer\ResourceManager</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleDescriptorAllocator.h">
-      <Filter>Renderer\SingleDescriptorAllocator</Filter>
     </ClInclude>
     <ClInclude Include="..\Util\LinkedList.h">
       <Filter>Util</Filter>
@@ -92,14 +80,8 @@
     <ClCompile Include="BasicMeshObject.cpp">
       <Filter>Renderer\BasicMeshObject</Filter>
     </ClCompile>
-    <ClCompile Include="DescriptorPool.cpp">
-      <Filter>Renderer\DescriptorPool</Filter>
-    </ClCompile>
     <ClCompile Include="D3D12ResourceManager.cpp">
       <Filter>Renderer\ResourceManager</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleDescriptorAllocator.cpp">
-      <Filter>Renderer\SingleDescriptorAllocator</Filter>
     </ClCompile>
     <ClCompile Include="..\Util\LinkedList.cpp">
       <Filter>Util</Filter>

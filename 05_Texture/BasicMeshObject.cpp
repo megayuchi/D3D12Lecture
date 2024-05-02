@@ -37,7 +37,7 @@ lb_true:
 }
 BOOL CBasicMeshObject::InitRootSinagture()
 {
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	ID3DBlob* pSignature = nullptr;
 	ID3DBlob* pError = nullptr;
 
@@ -88,7 +88,7 @@ BOOL CBasicMeshObject::InitRootSinagture()
 }
 BOOL CBasicMeshObject::InitPipelineState()
 {
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
 	ID3DBlob* pVertexShader = nullptr;
 	ID3DBlob* pPixelShader = nullptr;
@@ -156,7 +156,7 @@ BOOL CBasicMeshObject::CreateDescriptorTable()
 {
 
 	BOOL bResult = FALSE;
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
 	// 렌더링시 Descriptor Table로 사용할 Descriptor Heap - 
 	// Descriptor Table
@@ -181,7 +181,7 @@ lb_return:
 BOOL CBasicMeshObject::CreateMesh()
 {
 	BOOL bResult = FALSE;
-	ID3D12Device* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
 
 	// Create the vertex buffer.
