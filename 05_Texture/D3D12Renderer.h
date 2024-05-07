@@ -6,7 +6,6 @@ const UINT MAX_PENDING_FRAME_NUM = SWAP_CHAIN_FRAME_COUNT - 1;
 class CD3D12ResourceManager;
 class CD3D12Renderer
 {
-	static const UINT DESCRIPTOR_COUNT_FOR_DRAW = 1;	// | Tex 
 	static const UINT MAX_DRAW_COUNT_PER_FRAME = 256;
 
 	HWND	m_hWnd = nullptr;

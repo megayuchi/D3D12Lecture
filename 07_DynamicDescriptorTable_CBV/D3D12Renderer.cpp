@@ -190,7 +190,7 @@ lb_exit:
 	m_pResourceManager->Initialize(m_pD3DDevice);
 
 	m_pDescriptorPool = new CDescriptorPool;
-	m_pDescriptorPool->Initialize(m_pD3DDevice, MAX_DRAW_COUNT_PER_FRAME * DESCRIPTOR_COUNT_FOR_DRAW);
+	m_pDescriptorPool->Initialize(m_pD3DDevice, MAX_DRAW_COUNT_PER_FRAME * CBasicMeshObject::DESCRIPTOR_COUNT_FOR_DRAW);
 
 	m_pConstantBufferPool = new CSimpleConstantBufferPool;
 	m_pConstantBufferPool->Initialize(m_pD3DDevice, AlignConstantBufferSize(sizeof(CONSTANT_BUFFER_DEFAULT)), MAX_DRAW_COUNT_PER_FRAME);

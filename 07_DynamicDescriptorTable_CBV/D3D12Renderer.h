@@ -8,7 +8,6 @@ class CDescriptorPool;
 class CSimpleConstantBufferPool;
 class CD3D12Renderer
 {
-	static const UINT DESCRIPTOR_COUNT_FOR_DRAW = 1;	// | Constant Buffer | 
 	static const UINT MAX_DRAW_COUNT_PER_FRAME = 256;
 
 	HWND	m_hWnd = nullptr;

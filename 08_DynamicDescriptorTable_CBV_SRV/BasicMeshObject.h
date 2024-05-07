@@ -10,8 +10,9 @@ enum BASIC_MESH_DESCRIPTOR_INDEX
 class CD3D12Renderer;
 class CBasicMeshObject
 {
+public:
 	static const UINT DESCRIPTOR_COUNT_FOR_DRAW = 2;	// | Constant Buffer | Tex |
-	
+private:
 	// shared by all CBasicMeshObject instances.
 	static ID3D12RootSignature* m_pRootSignature;
 	static ID3D12PipelineState* m_pPipelineState;

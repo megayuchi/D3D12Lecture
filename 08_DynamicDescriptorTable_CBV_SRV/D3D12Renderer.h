@@ -9,7 +9,6 @@ class CSimpleConstantBufferPool;
 class CSingleDescriptorAllocator;
 class CD3D12Renderer
 {
-	static const UINT DESCRIPTOR_COUNT_FOR_DRAW = 1;	// | Constant Buffer | 
 	static const UINT MAX_DRAW_COUNT_PER_FRAME = 256;
 	static const UINT MAX_DESCRIPTOR_COUNT = 4096;
 	static const UINT PRE_CREATED_TEXTURE_COUNT = 2;
