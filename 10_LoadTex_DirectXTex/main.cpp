@@ -29,7 +29,6 @@ using namespace DirectX;
 #elif defined(_M_AMD64)
 	#ifdef _DEBUG
 		#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/debug/DirectXTex.lib")
-		#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/debug/DirectXTex.lib")
 	#else
 		#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/release/DirectXTex.lib")
 	#endif
