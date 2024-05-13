@@ -24,6 +24,10 @@ private:
 	ID3D12Resource* m_pVertexBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView = {};
 
+	// index data
+	ID3D12Resource* m_pIndexBuffer = nullptr;
+	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView = {};
+
 	BOOL	InitCommonResources();
 	void	CleanupSharedResources();
 

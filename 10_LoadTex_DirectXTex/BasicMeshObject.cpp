@@ -174,9 +174,16 @@ BOOL CBasicMeshObject::CreateMesh()
 	// Define the geometry for a triangle.
 	BasicVertex Vertices[] =
 	{
-		{ { 0.0f, 0.25f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f } },
+		{ { -0.25f, 0.25f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+		{ { 0.25f, 0.25f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
 		{ { 0.25f, -0.25f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
-		{ { -0.25f, -0.25f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } }
+		{ { -0.25f, -0.25f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
+	};
+
+	WORD Indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
 	};
 
 	const UINT VertexBufferSize = sizeof(Vertices);
@@ -187,7 +194,11 @@ BOOL CBasicMeshObject::CreateMesh()
 		goto lb_return;
 	}
 	
-
+	if (FAILED(pResourceManager->CreateIndexBuffer((DWORD)_countof(Indices), &m_IndexBufferView, &m_pIndexBuffer, Indices)))
+	{
+		__debugbreak();
+		goto lb_return;
+	}
 	bResult = TRUE;
 
 lb_return:
@@ -250,7 +261,8 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMMAT
 	pCommandList->SetPipelineState(m_pPipelineState);
 	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pCommandList->IASetVertexBuffers(0, 1, &m_VertexBufferView);
-	pCommandList->DrawInstanced(3, 1, 0, 0);
+	pCommandList->IASetIndexBuffer(&m_IndexBufferView);
+	pCommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 	
 
 }
@@ -261,6 +273,11 @@ void CBasicMeshObject::Cleanup()
 	{
 		m_pVertexBuffer->Release();
 		m_pVertexBuffer = nullptr;
+	}
+	if (m_pIndexBuffer)
+	{
+		m_pIndexBuffer->Release();
+		m_pIndexBuffer = nullptr;
 	}
 	CleanupSharedResources();
 }

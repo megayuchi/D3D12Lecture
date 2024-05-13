@@ -210,7 +210,7 @@ void Update()
 	g_matWorld0 = XMMatrixIdentity();
 
 	// rotation 
-	XMMATRIX matRot0 = XMMatrixRotationY(g_fRot0);
+	XMMATRIX matRot0 = XMMatrixRotationX(g_fRot0);
 
 	// translation
 	XMMATRIX matTrans0 = XMMatrixTranslation(-0.15f, 0.0f, 0.25f);
