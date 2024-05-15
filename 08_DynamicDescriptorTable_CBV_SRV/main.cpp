@@ -92,7 +92,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_pRenderer = new CD3D12Renderer;
 	g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
-	g_pMeshObj = g_pRenderer->CretateBasicMeshObject();
+	g_pMeshObj = g_pRenderer->CreateBasicMeshObject();
 	
 	g_pTexHandle0 = g_pRenderer->CreateTiledTexture(16, 16, 192, 128, 255);
 	g_pTexHandle1 = g_pRenderer->CreateTiledTexture(32, 32, 128, 255, 192);

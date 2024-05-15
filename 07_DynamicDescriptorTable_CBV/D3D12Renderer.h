@@ -61,7 +61,7 @@ public:
 	BOOL	UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBufferHeight);
 
 	BOOL	AllocDescriptorTable(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCPUDescriptor, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGPUDescriptor);
-	void*	CretateBasicMeshObject();
+	void*	CreateBasicMeshObject();
 	void	DeleteBasicMeshObject(void* pMeshObjHandle);
 	void	RenderMeshObject(void* pMeshObjHandle, float x_offset, float y_offset);
 

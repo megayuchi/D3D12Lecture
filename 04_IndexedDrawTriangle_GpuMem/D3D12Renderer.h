@@ -52,7 +52,7 @@ public:
 	void	Present();
 	BOOL	UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBufferHeight);
 
-	void*	CretateBasicMeshObject();
+	void*	CreateBasicMeshObject();
 	void	DeleteBasicMeshObject(void* pMeshObjHandle);
 	void	RenderMeshObject(void* pMeshObjHandle);
 

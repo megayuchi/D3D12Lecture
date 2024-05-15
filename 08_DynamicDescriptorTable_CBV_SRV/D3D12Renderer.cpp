@@ -369,7 +369,7 @@ void CD3D12Renderer::Present()
 	m_pDescriptorPool->Reset();
 }
 
-void* CD3D12Renderer::CretateBasicMeshObject()
+void* CD3D12Renderer::CreateBasicMeshObject()
 {
 	CBasicMeshObject* pMeshObj = new CBasicMeshObject;
 	pMeshObj->Initialize(this);

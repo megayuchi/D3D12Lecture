@@ -82,7 +82,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_pRenderer = new CD3D12Renderer;
 	g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
-	g_pMeshObj = g_pRenderer->CretateBasicMeshObject();
+	g_pMeshObj = g_pRenderer->CreateBasicMeshObject();
 
 	// Main message loop:
 	//while (GetMessage(&msg, nullptr, 0, 0))
