@@ -43,9 +43,6 @@
     <Filter Include="Renderer\ConstantBufferPool">
       <UniqueIdentifier>{79d5ad66-0ddc-44dc-b98d-c23e53d6ff09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\NewFilter1">
-      <UniqueIdentifier>{734f5dea-b708-47b5-a21f-6b5cd0bd4b0e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">

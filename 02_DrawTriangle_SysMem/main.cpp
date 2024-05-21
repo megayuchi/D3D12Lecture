@@ -4,6 +4,7 @@
 
 
 #include "pch.h"
+#include <Windows.h>
 #include "Resource.h"
 #include "D3D12Renderer.h"
 
@@ -43,7 +44,13 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 CD3D12Renderer* g_pRenderer = nullptr;
 void* g_pMeshObj = nullptr;
+
+ULONGLONG g_PrvFrameCheckTick = 0;
+ULONGLONG g_PrvUpdateTick = 0;
+DWORD	g_FrameCount = 0;
+
 void RunGame();
+void Update();
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -82,8 +89,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_pRenderer = new CD3D12Renderer;
 	g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
-	g_pMeshObj = g_pRenderer->CretateBasicMeshObject();
+	g_pMeshObj = g_pRenderer->CreateBasicMeshObject();
 
+	SetWindowText(g_hMainWindow, L"DrawTriangle_SysMem");
 	// Main message loop:
 	//while (GetMessage(&msg, nullptr, 0, 0))
 	//{
@@ -135,10 +143,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 void RunGame()
 {
+	g_FrameCount++;
+
 	// begin
+	ULONGLONG CurTick = GetTickCount64();
+
 	g_pRenderer->BeginRender();
 
 	// game business logic
+	if (CurTick - g_PrvUpdateTick > 16)
+	{
+		// Update Scene with 60FPS
+		Update();
+		g_PrvUpdateTick = CurTick;
+	}
 
 	// rendering objects
 	g_pRenderer->RenderMeshObject(g_pMeshObj);
@@ -148,8 +166,21 @@ void RunGame()
 	// Present
 	g_pRenderer->Present();
 	
+	if (CurTick - g_PrvFrameCheckTick > 1000)
+	{
+		g_PrvFrameCheckTick = CurTick;	
+				
+		WCHAR wchTxt[64];
+		swprintf_s(wchTxt, L"FPS:%u", g_FrameCount);
+		SetWindowText(g_hMainWindow, wchTxt);
+				
+		g_FrameCount = 0;
+	}
 }
+void Update()
+{
 
+}
 //
 //  FUNCTION: MyRegisterClass()
 //

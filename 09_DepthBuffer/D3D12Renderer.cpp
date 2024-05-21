@@ -154,7 +154,7 @@ lb_exit:
 		pSwapChain1->QueryInterface(IID_PPV_ARGS(&m_pSwapChain));
 		pSwapChain1->Release();
 		pSwapChain1 = nullptr;
-		m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+		m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 	}
 	m_Viewport.Width = (float)dwWndWidth;
 	m_Viewport.Height = (float)dwWndHeight;
@@ -316,9 +316,9 @@ BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBuffe
 	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator,nullptr)))
 		__debugbreak();
 
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiFrameIndex, m_rtvDescriptorSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiRenderTargetIndex, m_rtvDescriptorSize);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
 
 	m_pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
@@ -348,7 +348,7 @@ BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBuffe
 	}
 
 	
-	m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+	m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
 	// Create frame resources.
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart());
@@ -387,9 +387,9 @@ void CD3D12Renderer::BeginRender()
 	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator, nullptr)))
 		__debugbreak();
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiFrameIndex, m_rtvDescriptorSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiRenderTargetIndex, m_rtvDescriptorSize);
 
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
 
@@ -419,7 +419,7 @@ void CD3D12Renderer::EndRender()
 	// 지오메트리 렌더링
 	//
 
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 	m_pCommandList->Close();
 	
 	ID3D12CommandList* ppCommandLists[] = { m_pCommandList };
@@ -431,8 +431,8 @@ void CD3D12Renderer::Present()
 	//
 	// Back Buffer 화면을 Primary Buffer로 전송
 	//
-	UINT m_SyncInterval = 1;	// VSync On
-	//UINT m_SyncInterval = 0;	// VSync Off
+	//UINT m_SyncInterval = 1;	// VSync On
+	UINT m_SyncInterval = 0;	// VSync Off
 
 	UINT uiSyncInterval = m_SyncInterval;
 	UINT uiPresentFlags = 0;
@@ -450,7 +450,7 @@ void CD3D12Renderer::Present()
 	}
 
 	// for next frame
-    m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+    m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
 
 	Fence();
@@ -461,7 +461,7 @@ void CD3D12Renderer::Present()
 	m_pDescriptorPool->Reset();
 }
 
-void* CD3D12Renderer::CretateBasicMeshObject()
+void* CD3D12Renderer::CreateBasicMeshObject()
 {
 	CBasicMeshObject* pMeshObj = new CBasicMeshObject;
 	pMeshObj->Initialize(this);

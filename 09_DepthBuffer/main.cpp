@@ -56,6 +56,10 @@ float g_fRot1 = 0.0f;
 XMMATRIX g_matWorld0 = {};
 XMMATRIX g_matWorld1 = {};
 
+ULONGLONG g_PrvFrameCheckTick = 0;
+ULONGLONG g_PrvUpdateTick = 0;
+DWORD	g_FrameCount = 0;
+
 void RunGame();
 void Update();
 
@@ -96,10 +100,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_pRenderer = new CD3D12Renderer;
 	g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
-	g_pMeshObj = g_pRenderer->CretateBasicMeshObject();
+	g_pMeshObj = g_pRenderer->CreateBasicMeshObject();
 	
 	g_pTexHandle0 = g_pRenderer->CreateTiledTexture(16, 16, 192, 128, 255);
 	g_pTexHandle1 = g_pRenderer->CreateTiledTexture(32, 32, 128, 255, 192);
+
+	SetWindowText(g_hMainWindow, L"DepthBuffer");
 
 	// Main message loop:
 	//while (GetMessage(&msg, nullptr, 0, 0))
@@ -162,11 +168,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 void RunGame()
 {
+	g_FrameCount++;
+
 	// begin
+	ULONGLONG CurTick = GetTickCount64();
+
 	g_pRenderer->BeginRender();
 
 	// game business logic
-	Update();
+	if (CurTick - g_PrvUpdateTick > 16)
+	{
+		// Update Scene with 60FPS
+		Update();
+		g_PrvUpdateTick = CurTick;
+	}
 
 	// rendering objects
 	g_pRenderer->RenderMeshObject(g_pMeshObj, &g_matWorld0, g_pTexHandle0);
@@ -178,6 +193,17 @@ void RunGame()
 
 	// Present
 	g_pRenderer->Present();
+	
+	if (CurTick - g_PrvFrameCheckTick > 1000)
+	{
+		g_PrvFrameCheckTick = CurTick;	
+				
+		WCHAR wchTxt[64];
+		swprintf_s(wchTxt, L"FPS:%u", g_FrameCount);
+		SetWindowText(g_hMainWindow, wchTxt);
+				
+		g_FrameCount = 0;
+	}
 	
 }
 void Update()

@@ -1,7 +1,6 @@
 #pragma once
 
 const UINT SWAP_CHAIN_FRAME_COUNT = 2;
-const UINT MAX_PENDING_FRAME_NUM = SWAP_CHAIN_FRAME_COUNT - 1;
 
 class CD3D12ResourceManager;
 class CD3D12Renderer
@@ -11,9 +10,10 @@ class CD3D12Renderer
 	HWND	m_hWnd = nullptr;
 	ID3D12Device5*	m_pD3DDevice = nullptr;
 	ID3D12CommandQueue*	m_pCommandQueue = nullptr;
+	CD3D12ResourceManager*	m_pResourceManager = nullptr;
 	ID3D12CommandAllocator* m_pCommandAllocator = nullptr;
 	ID3D12GraphicsCommandList* m_pCommandList = nullptr;
-	CD3D12ResourceManager*	m_pResourceManager = nullptr;
+	UINT64	m_ui64FenceValue = 0;
 
 	D3D_FEATURE_LEVEL	m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
 	DXGI_ADAPTER_DESC1	m_AdapterDesc = {};
@@ -29,10 +29,10 @@ class CD3D12Renderer
 	ID3D12DescriptorHeap*		m_pSRVHeap = nullptr;
 	UINT	m_rtvDescriptorSize = 0;
 	UINT	m_dwSwapChainFlags = 0;
-	UINT	m_uiFrameIndex = 0;
+	UINT	m_uiRenderTargetIndex = 0;
 	HANDLE	m_hFenceEvent = nullptr;
 	ID3D12Fence* m_pFence = nullptr;
-	UINT64	m_ui64FenceValue = 0;
+	
 	
 	DWORD	m_dwCurContextIndex = 0;
 
@@ -56,7 +56,7 @@ public:
 	BOOL	UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBufferHeight);
 
 	BOOL	AllocDescriptorTable(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCPUDescriptor, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGPUDescriptor);
-	void*	CretateBasicMeshObject();
+	void*	CreateBasicMeshObject();
 	void	DeleteBasicMeshObject(void* pMeshObjHandle);
 	void	RenderMeshObject(void* pMeshObjHandle, float x_offset, float y_offset);
 

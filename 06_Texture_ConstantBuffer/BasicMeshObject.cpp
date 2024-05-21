@@ -293,10 +293,6 @@ BOOL CBasicMeshObject::CreateMesh()
 		m_pSysConstBufferDefault->offset.y = 0.0f;
 	}
 
-	// dispatch할때 사용할 common heap에 카피
-	//CD3DX12_CPU_DESCRIPTOR_HANDLE	commonHeapDest(m_pCommonHeap->GetCPUDescriptorHandleForHeapStart(), COMMON_DESCRIPTOR_INDEX_SRV_COLORMAP, m_srvDescriptorSize);
-	//pDevice->CopyDescriptorsSimple(1, commonHeapDest, srv, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 	bResult = TRUE;
 
 lb_return:
