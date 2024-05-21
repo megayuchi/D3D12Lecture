@@ -1,10 +1,6 @@
 #pragma once
 
 const UINT SWAP_CHAIN_FRAME_COUNT = 2;
-<<<<<<< HEAD
-=======
-const UINT MAX_PENDING_FRAME_NUM = SWAP_CHAIN_FRAME_COUNT - 1;
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 
 class CD3D12ResourceManager;
 class CDescriptorPool;
@@ -14,7 +10,6 @@ class CD3D12Renderer
 {
 	static const UINT MAX_DRAW_COUNT_PER_FRAME = 256;
 	static const UINT MAX_DESCRIPTOR_COUNT = 4096;
-<<<<<<< HEAD
 
 	HWND	m_hWnd = nullptr;
 	ID3D12Device5*	m_pD3DDevice = nullptr;
@@ -27,18 +22,6 @@ class CD3D12Renderer
 	CDescriptorPool*	m_pDescriptorPool = nullptr;
 	CSimpleConstantBufferPool* m_pConstantBufferPool = nullptr;
 	UINT64	m_ui64FenceValue = 0;
-=======
-	static const UINT PRE_CREATED_TEXTURE_COUNT = 2;
-	HWND	m_hWnd = nullptr;
-	ID3D12Device5*	m_pD3DDevice = nullptr;
-	ID3D12CommandQueue*	m_pCommandQueue = nullptr;
-	ID3D12CommandAllocator* m_pCommandAllocator = nullptr;
-	ID3D12GraphicsCommandList* m_pCommandList = nullptr;
-	CD3D12ResourceManager*	m_pResourceManager = nullptr;
-	CDescriptorPool*	m_pDescriptorPool = nullptr;
-	CSimpleConstantBufferPool* m_pConstantBufferPool = nullptr;
-	CSingleDescriptorAllocator* m_pSingleDescriptorAllocator = nullptr;
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 
 	D3D_FEATURE_LEVEL	m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
 	DXGI_ADAPTER_DESC1	m_AdapterDesc = {};
@@ -57,27 +40,15 @@ class CD3D12Renderer
 	UINT	m_srvDescriptorSize = 0;
 	UINT	m_dsvDescriptorSize = 0;
 	UINT	m_dwSwapChainFlags = 0;
-<<<<<<< HEAD
 	UINT	m_uiRenderTargetIndex = 0;
 	HANDLE	m_hFenceEvent = nullptr;
 	ID3D12Fence* m_pFence = nullptr;
 	
-=======
-	UINT	m_uiFrameIndex = 0;
-	HANDLE	m_hFenceEvent = nullptr;
-	ID3D12Fence* m_pFence = nullptr;
-	UINT64	m_ui64FenceValue = 0;
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 	
 	DWORD	m_dwCurContextIndex = 0;
 	XMMATRIX m_matView = {};
 	XMMATRIX m_matProj = {};
 
-<<<<<<< HEAD
-=======
-	TEXTURE_HANDLE	m_TextureList[PRE_CREATED_TEXTURE_COUNT] = {};
-
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 	void	InitCamera();
 
 	BOOL	CreateDepthStencil(UINT Width, UINT Height);

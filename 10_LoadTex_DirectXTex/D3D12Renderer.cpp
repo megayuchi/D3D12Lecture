@@ -154,11 +154,7 @@ lb_exit:
 		pSwapChain1->QueryInterface(IID_PPV_ARGS(&m_pSwapChain));
 		pSwapChain1->Release();
 		pSwapChain1 = nullptr;
-<<<<<<< HEAD
 		m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
-=======
-		m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 	}
 	m_Viewport.Width = (float)dwWndWidth;
 	m_Viewport.Height = (float)dwWndHeight;
@@ -320,15 +316,9 @@ BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBuffe
 	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator,nullptr)))
 		__debugbreak();
 
-<<<<<<< HEAD
 	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiRenderTargetIndex, m_rtvDescriptorSize);
-=======
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiFrameIndex, m_rtvDescriptorSize);
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
 
 	m_pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
@@ -358,11 +348,7 @@ BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBuffe
 	}
 
 	
-<<<<<<< HEAD
 	m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
-=======
-	m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 
 	// Create frame resources.
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart());
@@ -401,15 +387,9 @@ void CD3D12Renderer::BeginRender()
 	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator, nullptr)))
 		__debugbreak();
 
-<<<<<<< HEAD
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiRenderTargetIndex, m_rtvDescriptorSize);
 
 	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-=======
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiFrameIndex, m_rtvDescriptorSize);
-
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
 
@@ -439,11 +419,7 @@ void CD3D12Renderer::EndRender()
 	// 지오메트리 렌더링
 	//
 
-<<<<<<< HEAD
 	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-=======
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiFrameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 	m_pCommandList->Close();
 	
 	ID3D12CommandList* ppCommandLists[] = { m_pCommandList };
@@ -455,13 +431,8 @@ void CD3D12Renderer::Present()
 	//
 	// Back Buffer 화면을 Primary Buffer로 전송
 	//
-<<<<<<< HEAD
 	//UINT m_SyncInterval = 1;	// VSync On
 	UINT m_SyncInterval = 0;	// VSync Off
-=======
-	UINT m_SyncInterval = 1;	// VSync On
-	//UINT m_SyncInterval = 0;	// VSync Off
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 
 	UINT uiSyncInterval = m_SyncInterval;
 	UINT uiPresentFlags = 0;
@@ -479,11 +450,7 @@ void CD3D12Renderer::Present()
 	}
 
 	// for next frame
-<<<<<<< HEAD
     m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
-=======
-    m_uiFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
->>>>>>> bd8cd8b5c82483716004cddefea283f874e1ded6
 
 
 	Fence();
