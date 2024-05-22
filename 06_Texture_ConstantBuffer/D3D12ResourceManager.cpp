@@ -186,7 +186,7 @@ BOOL CD3D12ResourceManager::CreateTexture(ID3D12Resource** ppOutResource, UINT W
 
 		const BYTE* pSrc = pInitImage;
 		BYTE* pDest = pMappedPtr;
-		for (UINT y = 0; y < Width; y++)
+		for (UINT y = 0; y < Height; y++)
 		{
 			memcpy(pDest, pSrc, Width * 4);
 			pSrc += (Width * 4);

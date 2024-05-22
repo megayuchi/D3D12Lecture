@@ -568,7 +568,7 @@ void* CD3D12Renderer::CreateTextureFromFile(const WCHAR* wchFileName)
 	D3D12_CPU_DESCRIPTOR_HANDLE srv = {};
 
 	DXGI_FORMAT TexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-	D3D12_RESOURCE_DESC	desc = {};;
+	D3D12_RESOURCE_DESC	desc = {};
 	if (m_pResourceManager->CreateTextureFromFile(&pTexResource, &desc, wchFileName))
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
