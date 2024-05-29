@@ -46,11 +46,14 @@ BOOL CBasicMeshObject::InitRootSinagture()
 	ID3DBlob* pSignature = nullptr;
 	ID3DBlob* pError = nullptr;
 
-	// Object - CBV
+	// Object - CBV - RootParam(0)
 	// {
-	//   TriGrup 0 - SRV
-	//   TriGrup 1 - SRV
-	//   TriGrup 2 - SRV
+	//   TriGrup 0 - SRV[0] - RootParam(1) - Draw()
+	//   TriGrup 1 - SRV[1] - RootParam(1) - Draw()
+	//   TriGrup 2 - SRV[2] - RootParam(1) - Draw()
+	//   TriGrup 3 - SRV[3] - RootParam(1) - Draw()
+	//   TriGrup 4 - SRV[4] - RootParam(1) - Draw()
+	//   TriGrup 5 - SRV[5] - RootParam(1) - Draw()
 	// }
 
 	CD3DX12_DESCRIPTOR_RANGE rangesPerObj[1] = {};

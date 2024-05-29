@@ -87,7 +87,7 @@ DWORD	g_FrameCount = 0;
 void RunGame();
 void Update();
 void* CreateBoxMeshObject();
-void* CreateTriangleMesh();
+void* CreateQuadMesh();
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -125,14 +125,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 
 	g_pRenderer = new CD3D12Renderer;
-	g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
-	//g_pRenderer->Initialize(g_hMainWindow, FALSE, FALSE);
+	//g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
+	g_pRenderer->Initialize(g_hMainWindow, FALSE, FALSE);
 
 	// Create Box Mesh
 	g_pMeshObj0 = CreateBoxMeshObject();
 	
 	// create Triangle mesh
-	g_pMeshObj1 = CreateTriangleMesh();
+	g_pMeshObj1 = CreateQuadMesh();
 
 
 	SetWindowText(g_hMainWindow, L"MultiMaterial");
@@ -228,7 +228,7 @@ void* CreateBoxMeshObject()
 	}
 	return pMeshObj;
 }
-void* CreateTriangleMesh()
+void* CreateQuadMesh()
 {
 	void* pMeshObj = nullptr;
 	pMeshObj = g_pRenderer->CreateBasicMeshObject();
