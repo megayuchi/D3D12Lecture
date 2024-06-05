@@ -254,8 +254,7 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMMAT
 		CD3DX12_CPU_DESCRIPTOR_HANDLE srvDest(cpuDescriptorTable, BASIC_MESH_DESCRIPTOR_INDEX_TEX, srvDescriptorSize);
 		pD3DDeivce->CopyDescriptorsSimple(1, srvDest, srv, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);	// cpu측 코드에서는 cpu descriptor handle에만 write가능
 	}
-	// 
-	//CD3DX12_CPU_DESCRIPTOR_HANDLE
+	
 	pCommandList->SetGraphicsRootDescriptorTable(0, gpuDescriptorTable);
 
 	pCommandList->SetPipelineState(m_pPipelineState);

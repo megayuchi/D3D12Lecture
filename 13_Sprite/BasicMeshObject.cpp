@@ -120,11 +120,11 @@ BOOL CBasicMeshObject::InitPipelineState()
 #else
 	UINT compileFlags = 0;
 #endif
-	if (FAILED(D3DCompileFromFile(L"./Shaders/shaders.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &pVertexShader, nullptr)))
+	if (FAILED(D3DCompileFromFile(L"./Shaders/shBasicMesh.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &pVertexShader, nullptr)))
 	{
 		__debugbreak();
 	}
-	if (FAILED(D3DCompileFromFile(L"./Shaders/shaders.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pPixelShader, nullptr)))
+	if (FAILED(D3DCompileFromFile(L"./Shaders/shBasicMesh.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pPixelShader, nullptr)))
 	{
 		__debugbreak();
 	}
@@ -245,7 +245,7 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMMAT
 	UINT srvDescriptorSize = m_pRenderer->INL_GetSrvDescriptorSize();
 	CDescriptorPool* pDescriptorPool = m_pRenderer->INL_GetDescriptorPool();
 	ID3D12DescriptorHeap* pDescriptorHeap = pDescriptorPool->INL_GetDescriptorHeap();
-	CSimpleConstantBufferPool* pConstantBufferPool = m_pRenderer->INL_GetConstantBufferPool();
+	CSimpleConstantBufferPool* pConstantBufferPool = m_pRenderer->GetConstantBufferPool(CONSTANT_BUFFER_TYPE_DEFAULT);
 	
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable = {};

@@ -8,10 +8,12 @@
 #include "typedef.h"
 #include "../D3D_Util/D3DUtil.h"
 #include "BasicMeshObject.h"
+#include "SpriteObject.h"
 #include "D3D12ResourceManager.h"
 #include "DescriptorPool.h"
 #include "SimpleConstantBufferPool.h"
 #include "SingleDescriptorAllocator.h"
+#include "ConstantBufferManager.h"
 #include "D3D12Renderer.h"
 
 using namespace DirectX;
@@ -197,12 +199,14 @@ lb_exit:
 	m_pResourceManager = new CD3D12ResourceManager;
 	m_pResourceManager->Initialize(m_pD3DDevice);
 
-	m_pDescriptorPool = new CDescriptorPool;
-	m_pDescriptorPool->Initialize(m_pD3DDevice, MAX_DRAW_COUNT_PER_FRAME * CBasicMeshObject::DESCRIPTOR_COUNT_FOR_DRAW);
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
+	{
+		m_ppDescriptorPool[i] = new CDescriptorPool;
+		m_ppDescriptorPool[i]->Initialize(m_pD3DDevice, MAX_DRAW_COUNT_PER_FRAME * CBasicMeshObject::MAX_DESCRIPTOR_COUNT_FOR_DRAW);
 
-	m_pConstantBufferPool = new CSimpleConstantBufferPool;
-	m_pConstantBufferPool->Initialize(m_pD3DDevice, AlignConstantBufferSize((UINT)sizeof(CONSTANT_BUFFER_DEFAULT)), MAX_DRAW_COUNT_PER_FRAME);
-
+		m_ppConstBufferManager[i] = new CConstantBufferManager;
+		m_ppConstBufferManager[i]->Initialize(m_pD3DDevice, MAX_DRAW_COUNT_PER_FRAME);
+	}
 	m_pSingleDescriptorAllocator = new CSingleDescriptorAllocator;
 	m_pSingleDescriptorAllocator->Initialize(m_pD3DDevice, MAX_DESCRIPTOR_COUNT, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 		
@@ -251,7 +255,12 @@ void CD3D12Renderer::GetViewProjMatrix(XMMATRIX* pOutMatView, XMMATRIX* pOutMatP
 	*pOutMatView = XMMatrixTranspose(m_matView);
 	*pOutMatProj = XMMatrixTranspose(m_matProj);
 }
-
+CSimpleConstantBufferPool* CD3D12Renderer::GetConstantBufferPool(CONSTANT_BUFFER_TYPE type)
+{
+	CConstantBufferManager* pConstBufferManager = m_ppConstBufferManager[m_dwCurContextIndex];
+	CSimpleConstantBufferPool* pConstBufferPool = pConstBufferManager->GetConstantBufferPool(type);
+	return pConstBufferPool;
+}
 
 BOOL CD3D12Renderer::CreateDepthStencil(UINT Width, UINT Height)
 {
@@ -307,23 +316,14 @@ BOOL CD3D12Renderer::UpdateWindowSize(DWORD dwBackBufferWidth, DWORD dwBackBuffe
 
 	if (m_dwWidth == dwBackBufferWidth && m_dwHeight == dwBackBufferHeight)
 		return FALSE;
-	//WaitForFenceValue();
 
-	/*
-	if (FAILED(m_pCommandAllocator->Reset()))
-		__debugbreak();
+	// wait for all commands
+	Fence();
 
-	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator,nullptr)))
-		__debugbreak();
-
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiRenderTargetIndex, m_rtvDescriptorSize);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
-
-	m_pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-	*/
-
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
+	{
+		WaitForFenceValue(m_pui64LastFenceValue[i]);
+	}
 
 	DXGI_SWAP_CHAIN_DESC1	desc;
 	HRESULT	hr = m_pSwapChain->GetDesc1(&desc);
@@ -381,53 +381,74 @@ void CD3D12Renderer::BeginRender()
 	//
 	// 화면 클리어 및 이번 프레임 렌더링을 위한 자료구조 초기화
 	//
-	if (FAILED(m_pCommandAllocator->Reset()))
+	ID3D12CommandAllocator* pCommandAllocator = m_ppCommandAllocator[m_dwCurContextIndex];
+	ID3D12GraphicsCommandList* pCommandList = m_ppCommandList[m_dwCurContextIndex];
+
+	if (FAILED(pCommandAllocator->Reset()))
 		__debugbreak();
 
-	if (FAILED(m_pCommandList->Reset(m_pCommandAllocator, nullptr)))
+	if (FAILED(pCommandList->Reset(pCommandAllocator, nullptr)))
 		__debugbreak();
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(), m_uiRenderTargetIndex, m_rtvDescriptorSize);
 
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_pDSVHeap->GetCPUDescriptorHandleForHeapStart());
 
 	// Record commands.
 	const float BackColor[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-	m_pCommandList->ClearRenderTargetView(rtvHandle, BackColor, 0, nullptr);
-	m_pCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	pCommandList->ClearRenderTargetView(rtvHandle, BackColor, 0, nullptr);
+	pCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-	m_pCommandList->RSSetViewports(1, &m_Viewport);
-    m_pCommandList->RSSetScissorRects(1, &m_ScissorRect);
-	m_pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+	pCommandList->RSSetViewports(1, &m_Viewport);
+    pCommandList->RSSetScissorRects(1, &m_ScissorRect);
+	pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 }
 
-void CD3D12Renderer::RenderMeshObject(void* pMeshObjHandle, const XMMATRIX* pMatWorld, void* pTexHandle)
+void CD3D12Renderer::RenderMeshObject(void* pMeshObjHandle, const XMMATRIX* pMatWorld)
 {
+	ID3D12GraphicsCommandList* pCommandList = m_ppCommandList[m_dwCurContextIndex];
+
 	D3D12_CPU_DESCRIPTOR_HANDLE srv = {};
 	CBasicMeshObject* pMeshObj = (CBasicMeshObject*)pMeshObjHandle;
-	if (pTexHandle)
-	{
-		srv = ((TEXTURE_HANDLE*)pTexHandle)->srv;
-	}
-	pMeshObj->Draw(m_pCommandList, pMatWorld, srv);
+	pMeshObj->Draw(pCommandList, pMatWorld);
+}
+void CD3D12Renderer::RenderSpriteWithTex(void* pSprObjHandle, int iPosX, int iPosY, float fScaleX, float fScaleY, const RECT* pRect, float Z, void* pTexHandle)
+{
+	ID3D12GraphicsCommandList* pCommandList = m_ppCommandList[m_dwCurContextIndex];
+
+	CSpriteObject* pSpriteObj = (CSpriteObject*)pSprObjHandle;
+
+	XMFLOAT2 Pos = { (float)iPosX, (float)iPosY };
+	XMFLOAT2 Scale = { fScaleX, fScaleY };
+	pSpriteObj->DrawWithTex(pCommandList, &Pos, &Scale, pRect, Z, (TEXTURE_HANDLE*)pTexHandle);
+}
+void CD3D12Renderer::RenderSprite(void* pSprObjHandle, int iPosX, int iPosY, float fScaleX, float fScaleY, float Z)
+{
+	ID3D12GraphicsCommandList* pCommandList = m_ppCommandList[m_dwCurContextIndex];
+
+	CSpriteObject* pSpriteObj = (CSpriteObject*)pSprObjHandle;
+
+	XMFLOAT2 Pos = { (float)iPosX, (float)iPosY };
+	XMFLOAT2 Scale = { fScaleX, fScaleY };
+	pSpriteObj->Draw(pCommandList, &Pos, &Scale, Z);
 }
 void CD3D12Renderer::EndRender()
 {
-	//
-	// 지오메트리 렌더링
-	//
+	ID3D12GraphicsCommandList* pCommandList = m_ppCommandList[m_dwCurContextIndex];
 
-	m_pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-	m_pCommandList->Close();
+	pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pRenderTargets[m_uiRenderTargetIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	pCommandList->Close();
 	
-	ID3D12CommandList* ppCommandLists[] = { m_pCommandList };
+	ID3D12CommandList* ppCommandLists[] = { pCommandList };
     m_pCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 }
 
 void CD3D12Renderer::Present()
 {
+	Fence();
+
 	//
 	// Back Buffer 화면을 Primary Buffer로 전송
 	//
@@ -449,42 +470,95 @@ void CD3D12Renderer::Present()
 		__debugbreak();
 	}
 
-	// for next frame
-    m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+	m_uiRenderTargetIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
+	// prepare next frame
+	DWORD	dwNextContextIndex = (m_dwCurContextIndex + 1) % MAX_PENDING_FRAME_COUNT;
+	WaitForFenceValue(m_pui64LastFenceValue[dwNextContextIndex]);
 
-	Fence();
-
-	WaitForFenceValue();
-	
-	m_pConstantBufferPool->Reset();
-	m_pDescriptorPool->Reset();
+	// reset resources per frame
+	m_ppConstBufferManager[dwNextContextIndex]->Reset();
+	m_ppDescriptorPool[dwNextContextIndex]->Reset();
+	m_dwCurContextIndex = dwNextContextIndex;
 }
 
 void* CD3D12Renderer::CreateBasicMeshObject()
 {
 	CBasicMeshObject* pMeshObj = new CBasicMeshObject;
 	pMeshObj->Initialize(this);
-	pMeshObj->CreateMesh();
 	return pMeshObj;
+}
+BOOL CD3D12Renderer::BeginCreateMesh(void* pMeshObjHandle, const BasicVertex* pVertexList, DWORD dwVertexCount, DWORD dwTriGroupCount)
+{
+	CBasicMeshObject* pMeshObj = (CBasicMeshObject*)pMeshObjHandle;
+	BOOL bResult = pMeshObj->BeginCreateMesh(pVertexList, dwVertexCount, dwTriGroupCount);
+	return bResult;
+}
+BOOL CD3D12Renderer::InsertTriGroup(void* pMeshObjHandle, const WORD* pIndexList, DWORD dwTriCount, const WCHAR* wchTexFileName)
+{
+	CBasicMeshObject* pMeshObj = (CBasicMeshObject*)pMeshObjHandle;
+	BOOL bResult = pMeshObj->InsertIndexedTriList(pIndexList, dwTriCount, wchTexFileName);
+	return bResult;
+}
+void CD3D12Renderer::EndCreateMesh(void* pMeshObjHandle)
+{
+	CBasicMeshObject* pMeshObj = (CBasicMeshObject*)pMeshObjHandle;
+	pMeshObj->EndCreateMesh();
 }
 void CD3D12Renderer::DeleteBasicMeshObject(void* pMeshObjHandle)
 {
+	// wait for all commands
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
+	{
+		WaitForFenceValue(m_pui64LastFenceValue[i]);
+	}
+
 	CBasicMeshObject* pMeshObj = (CBasicMeshObject*)pMeshObjHandle;
 	delete pMeshObj;
+}
+
+void* CD3D12Renderer::CreateSpriteObject()
+{
+	CSpriteObject* pSprObj = new CSpriteObject;
+	pSprObj->Initialize(this);
+
+	return (void*)pSprObj;
+}
+void* CD3D12Renderer::CreateSpriteObject(const WCHAR* wchTexFileName, int PosX, int PosY, int Width, int Height)
+{
+	CSpriteObject* pSprObj = new CSpriteObject;
+
+	RECT rect;
+	rect.left = PosX;
+	rect.top = PosY;
+	rect.right = Width;
+	rect.bottom = Height;
+	pSprObj->Initialize(this, wchTexFileName, &rect);
+
+	return (void*)pSprObj;
+}
+void CD3D12Renderer::DeleteSpriteObject(void* pSpriteObjHandle)
+{
+	// wait for all commands
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
+	{
+		WaitForFenceValue(m_pui64LastFenceValue[i]);
+	}
+
+	CSpriteObject* pSprObj = (CSpriteObject*)pSpriteObjHandle;
+	delete pSprObj;
 }
 
 
 UINT64 CD3D12Renderer::Fence()
 {
-	m_ui64FenceValue++;
-	m_pCommandQueue->Signal(m_pFence, m_ui64FenceValue);
-	return m_ui64FenceValue;
+	m_ui64FenceVaule++;
+	m_pCommandQueue->Signal(m_pFence, m_ui64FenceVaule);
+	m_pui64LastFenceValue[m_dwCurContextIndex] = m_ui64FenceVaule;
+	return m_ui64FenceVaule;
 }
-void CD3D12Renderer::WaitForFenceValue()
+void CD3D12Renderer::WaitForFenceValue(UINT64 ExpectedFenceValue)
 {
-	const UINT64 ExpectedFenceValue = m_ui64FenceValue;
-
 	// Wait until the previous frame is finished.
 	if (m_pFence->GetCompletedValue() < ExpectedFenceValue)
 	{
@@ -568,7 +642,7 @@ void* CD3D12Renderer::CreateTextureFromFile(const WCHAR* wchFileName)
 	D3D12_CPU_DESCRIPTOR_HANDLE srv = {};
 
 	DXGI_FORMAT TexFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-	D3D12_RESOURCE_DESC	desc = {};
+	D3D12_RESOURCE_DESC	desc = {};;
 	if (m_pResourceManager->CreateTextureFromFile(&pTexResource, &desc, wchFileName))
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
@@ -596,6 +670,12 @@ void* CD3D12Renderer::CreateTextureFromFile(const WCHAR* wchFileName)
 }
 void CD3D12Renderer::DeleteTexture(void* pHandle)
 {
+	// wait for all commands
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
+	{
+		WaitForFenceValue(m_pui64LastFenceValue[i]);
+	}
+
 	TEXTURE_HANDLE* pTexHandle = (TEXTURE_HANDLE*)pHandle;
 	ID3D12Resource* pTexResource = pTexHandle->pTexResource;
 	D3D12_CPU_DESCRIPTOR_HANDLE srv = pTexHandle->srv;
@@ -607,32 +687,49 @@ void CD3D12Renderer::DeleteTexture(void* pHandle)
 }
 void CD3D12Renderer::CreateCommandList()
 {
-	if (FAILED(m_pD3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_pCommandAllocator))))
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
 	{
-		__debugbreak();
-	}
+		ID3D12CommandAllocator* pCommandAllocator = nullptr;
+		ID3D12GraphicsCommandList* pCommandList = nullptr;
 
-	// Create the command list.
-	if (FAILED(m_pD3DDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_pCommandAllocator, nullptr, IID_PPV_ARGS(&m_pCommandList))))
-	{
-		__debugbreak();
-	}
+		if (FAILED(m_pD3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pCommandAllocator))))
+		{
+			__debugbreak();
+		}
 
-	// Command lists are created in the recording state, but there is nothing
-	// to record yet. The main loop expects it to be closed, so close it now.
-	m_pCommandList->Close();
+		// Create the command list.
+		if (FAILED(m_pD3DDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, pCommandAllocator, nullptr, IID_PPV_ARGS(&pCommandList))))
+		{
+			__debugbreak();
+		}
+
+		// Command lists are created in the recording state, but there is nothing
+		// to record yet. The main loop expects it to be closed, so close it now.
+		pCommandList->Close();
+
+		m_ppCommandAllocator[i] = pCommandAllocator;
+		m_ppCommandList[i] = pCommandList;
+	}
 }
 void CD3D12Renderer::CleanupCommandList()
 {
-	if (m_pCommandList)
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
 	{
-		m_pCommandList->Release();
-		m_pCommandList = nullptr;
-	}
-	if (m_pCommandAllocator)
-	{
-		m_pCommandAllocator->Release();
-		m_pCommandAllocator = nullptr;
+		ID3D12CommandAllocator* pCommandAllocator = m_ppCommandAllocator[i];
+		ID3D12GraphicsCommandList* pCommandList = m_ppCommandList[i];
+
+		if (pCommandList)
+		{
+			pCommandList->Release();
+			pCommandList = nullptr;
+		}
+		if (pCommandAllocator)
+		{
+			pCommandAllocator->Release();
+			pCommandAllocator = nullptr;
+		}
+		m_ppCommandAllocator[i] = nullptr;
+		m_ppCommandList[i] = nullptr;
 	}
 }
 void CD3D12Renderer::CreateFence()
@@ -642,8 +739,6 @@ void CD3D12Renderer::CreateFence()
 	{
 		__debugbreak();
 	}
-
-	m_ui64FenceValue = 0;
 
 	// Create an event handle to use for frame synchronization.
 	m_hFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -718,22 +813,29 @@ void CD3D12Renderer::CleanupDescriptorHeapForDSV()
 
 void CD3D12Renderer::Cleanup()
 {
-	WaitForFenceValue();
+	Fence();
 
-	if (m_pConstantBufferPool)
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
 	{
-		delete m_pConstantBufferPool;
-		m_pConstantBufferPool = nullptr;
+		WaitForFenceValue(m_pui64LastFenceValue[i]);
+	}
+	for (DWORD i = 0; i < MAX_PENDING_FRAME_COUNT; i++)
+	{
+		if (m_ppConstBufferManager[i])
+		{
+			delete m_ppConstBufferManager[i];
+			m_ppConstBufferManager[i] = nullptr;
+		}
+		if (m_ppDescriptorPool[i])
+		{
+			delete m_ppDescriptorPool[i];
+			m_ppDescriptorPool[i] = nullptr;
+		}
 	}
 	if (m_pResourceManager)
 	{
 		delete m_pResourceManager;
 		m_pResourceManager = nullptr;
-	}
-	if (m_pDescriptorPool)
-	{
-		delete m_pDescriptorPool;
-		m_pDescriptorPool = nullptr;
 	}
 	if (m_pSingleDescriptorAllocator)
 	{

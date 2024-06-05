@@ -9,63 +9,93 @@
 #include "SingleDescriptorAllocator.h"
 #include "DescriptorPool.h"
 #include "D3D12Renderer.h"
-#include "BasicMeshObject.h"
+#include "SpriteObject.h"
 
 using namespace DirectX;
 
-ID3D12RootSignature* CBasicMeshObject::m_pRootSignature = nullptr;
-ID3D12PipelineState* CBasicMeshObject::m_pPipelineState = nullptr;
-DWORD CBasicMeshObject::m_dwInitRefCount = 0;
+ID3D12RootSignature* CSpriteObject::m_pRootSignature = nullptr;
+ID3D12PipelineState* CSpriteObject::m_pPipelineState = nullptr;
 
-CBasicMeshObject::CBasicMeshObject()
+ID3D12Resource* CSpriteObject::m_pVertexBuffer = nullptr;
+D3D12_VERTEX_BUFFER_VIEW CSpriteObject::m_VertexBufferView = {};
+
+ID3D12Resource* CSpriteObject::m_pIndexBuffer = nullptr;
+D3D12_INDEX_BUFFER_VIEW CSpriteObject::m_IndexBufferView = {};
+
+DWORD CSpriteObject::m_dwInitRefCount = 0;
+
+CSpriteObject::CSpriteObject()
 {
 }
 
-BOOL CBasicMeshObject::Initialize(CD3D12Renderer* pRenderer)
+BOOL CSpriteObject::Initialize(CD3D12Renderer* pRenderer)
 {
 	m_pRenderer = pRenderer;
 
 	BOOL bResult = InitCommonResources();
 	return bResult;
 }
-BOOL CBasicMeshObject::InitCommonResources()
+BOOL CSpriteObject::Initialize(CD3D12Renderer* pRenderer, const WCHAR* wchTexFileName, const RECT* pRect)
+{
+	m_pRenderer = pRenderer;
+
+	BOOL bResult = (InitCommonResources() != 0);
+	if (bResult)
+	{
+		UINT TexWidth = 1;
+		UINT TexHeight = 1;
+		m_pTexHandle = (TEXTURE_HANDLE*)m_pRenderer->CreateTextureFromFile(wchTexFileName);
+		if (m_pTexHandle)
+		{
+			D3D12_RESOURCE_DESC	 desc = m_pTexHandle->pTexResource->GetDesc();
+			TexWidth = desc.Width;
+			TexHeight = desc.Height;
+		}
+		if (pRect)
+		{
+			m_Rect = *pRect;
+			m_Scale.x = (float)(m_Rect.right - m_Rect.left) / (float)TexWidth;
+			m_Scale.y = (float)(m_Rect.bottom - m_Rect.top) / (float)TexHeight;
+		}
+		else
+		{
+			if (m_pTexHandle)
+			{
+				D3D12_RESOURCE_DESC	 desc = m_pTexHandle->pTexResource->GetDesc();
+				m_Rect.left = 0;
+				m_Rect.top = 0;
+				m_Rect.right = desc.Width;
+				m_Rect.bottom = desc.Height;
+			}
+		}
+	}
+	return bResult;
+}
+BOOL CSpriteObject::InitCommonResources()
 {
 	if (m_dwInitRefCount)
 		goto lb_true;
 
 	InitRootSinagture();
 	InitPipelineState();
+	InitMesh();
 
 lb_true:
 	m_dwInitRefCount++;
 	return m_dwInitRefCount;
 }
-BOOL CBasicMeshObject::InitRootSinagture()
+BOOL CSpriteObject::InitRootSinagture()
 {
 	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 	ID3DBlob* pSignature = nullptr;
 	ID3DBlob* pError = nullptr;
 
-	// Object - CBV - RootParam(0)
-	// {
-	//   TriGrup 0 - SRV[0] - RootParam(1) - Draw()
-	//   TriGrup 1 - SRV[1] - RootParam(1) - Draw()
-	//   TriGrup 2 - SRV[2] - RootParam(1) - Draw()
-	//   TriGrup 3 - SRV[3] - RootParam(1) - Draw()
-	//   TriGrup 4 - SRV[4] - RootParam(1) - Draw()
-	//   TriGrup 5 - SRV[5] - RootParam(1) - Draw()
-	// }
-
-	CD3DX12_DESCRIPTOR_RANGE rangesPerObj[1] = {};
-	rangesPerObj[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);	// b0 : Constant Buffer View per Object
-
-	CD3DX12_DESCRIPTOR_RANGE rangesPerTriGroup[1] = {};
-	rangesPerTriGroup[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);	// t0 : Shader Resource View(Tex) per Tri-Group
+	CD3DX12_DESCRIPTOR_RANGE ranges[2] = {};
+	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);	// b0 : Constant Buffer View
+	ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);	// t0 : Shader Resource View(Tex)
 	
-	CD3DX12_ROOT_PARAMETER rootParameters[2] = {};
-	rootParameters[0].InitAsDescriptorTable(_countof(rangesPerObj), rangesPerObj, D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[1].InitAsDescriptorTable(_countof(rangesPerTriGroup), rangesPerTriGroup, D3D12_SHADER_VISIBILITY_ALL);
-
+	CD3DX12_ROOT_PARAMETER rootParameters[1] = {};
+	rootParameters[0].InitAsDescriptorTable(_countof(ranges), ranges, D3D12_SHADER_VISIBILITY_ALL);
 
 	// default sampler
 	D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -106,7 +136,7 @@ BOOL CBasicMeshObject::InitRootSinagture()
 	}
 	return TRUE;
 }
-BOOL CBasicMeshObject::InitPipelineState()
+BOOL CSpriteObject::InitPipelineState()
 {
 	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
 
@@ -120,12 +150,23 @@ BOOL CBasicMeshObject::InitPipelineState()
 #else
 	UINT compileFlags = 0;
 #endif
-	if (FAILED(D3DCompileFromFile(L"./Shaders/shaders.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &pVertexShader, nullptr)))
+	ID3DBlob* pErrorBlob = nullptr;
+	if (FAILED(D3DCompileFromFile(L"./Shaders/shSprite.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &pVertexShader, &pErrorBlob)))
 	{
+		if (pErrorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			pErrorBlob->Release();
+		}
 		__debugbreak();
 	}
-	if (FAILED(D3DCompileFromFile(L"./Shaders/shaders.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pPixelShader, nullptr)))
+	if (FAILED(D3DCompileFromFile(L"./Shaders/shSprite.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pPixelShader, &pErrorBlob)))
 	{
+		if (pErrorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			pErrorBlob->Release();
+		}
 		__debugbreak();
 	}
 
@@ -175,68 +216,57 @@ BOOL CBasicMeshObject::InitPipelineState()
 	}
 	return TRUE;
 }
-BOOL CBasicMeshObject::BeginCreateMesh(const BasicVertex* pVertexList, DWORD dwVertexNum, DWORD dwTriGroupCount)
+BOOL CSpriteObject::InitMesh()
 {
+	// 바깥에서 버텍스데이터와 텍스처를 입력하는 식으로 변경할 것
+
 	BOOL bResult = FALSE;
 	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
+	UINT srvDescriptorSize = m_pRenderer->INL_GetSrvDescriptorSize();
 	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
+	CSingleDescriptorAllocator* pSingleDescriptorAllocator = m_pRenderer->INL_GetSingleDescriptorAllocator();
+	
+	// Create the vertex buffer.
+	// Define the geometry for a triangle.
+	BasicVertex Vertices[] =
+	{
+		{ { 0.0f, 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
+		{ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+		{ { 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+		{ { 1.0f, 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
+	};
 
-	if (dwTriGroupCount > MAX_TRI_GROUP_COUNT_PER_OBJ)
-		__debugbreak();
 
-	if (FAILED(pResourceManager->CreateVertexBuffer(sizeof(BasicVertex), dwVertexNum, &m_VertexBufferView, &m_pVertexBuffer, (void*)pVertexList)))
+	WORD Indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
+	};
+
+	const UINT VertexBufferSize = sizeof(Vertices);
+
+	if (FAILED(pResourceManager->CreateVertexBuffer(sizeof(BasicVertex), (DWORD)_countof(Vertices), &m_VertexBufferView, &m_pVertexBuffer, Vertices)))
 	{
 		__debugbreak();
 		goto lb_return;
 	}
 	
-	m_dwMaxTriGroupCount = dwTriGroupCount;
-	m_pTriGroupList = new INDEXED_TRI_GROUP[m_dwMaxTriGroupCount];
-	memset(m_pTriGroupList, 0, sizeof(INDEXED_TRI_GROUP) * m_dwMaxTriGroupCount);
-
-
+	if (FAILED(pResourceManager->CreateIndexBuffer((DWORD)_countof(Indices), &m_IndexBufferView, &m_pIndexBuffer, Indices)))
+	{
+		__debugbreak();
+		goto lb_return;
+	}
 	bResult = TRUE;
 
 lb_return:
 	return bResult;
 }
-BOOL CBasicMeshObject::InsertIndexedTriList(const WORD* pIndexList, DWORD dwTriCount, const WCHAR* wchTexFileName)
+void CSpriteObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMFLOAT2* pPos, const XMFLOAT2* pScale, float Z)
 {
-	BOOL bResult = FALSE;
-
-	ID3D12Device5* pD3DDeivce = m_pRenderer->INL_GetD3DDevice();
-	UINT srvDescriptorSize = m_pRenderer->INL_GetSrvDescriptorSize();
-	CD3D12ResourceManager*	pResourceManager = m_pRenderer->INL_GetResourceManager();
-	CSingleDescriptorAllocator* pSingleDescriptorAllocator = m_pRenderer->INL_GetSingleDescriptorAllocator();
-
-	ID3D12Resource* pIndexBuffer = nullptr;
-	D3D12_INDEX_BUFFER_VIEW IndexBufferView = {};
-
-	if (m_dwTriGroupCount >= m_dwMaxTriGroupCount)
-	{
-		__debugbreak();
-		goto lb_return;
-	}
-	if (FAILED(pResourceManager->CreateIndexBuffer(dwTriCount * 3, &IndexBufferView, &pIndexBuffer, (void*)pIndexList)))
-	{
-		__debugbreak();
-		goto lb_return;
-	}
-	INDEXED_TRI_GROUP*	pTriGroup = m_pTriGroupList + m_dwTriGroupCount;
-	pTriGroup->pIndexBuffer = pIndexBuffer;
-	pTriGroup->IndexBufferView = IndexBufferView;
-	pTriGroup->dwTriCount = dwTriCount;
-	pTriGroup->pTexHandle = (TEXTURE_HANDLE*)m_pRenderer->CreateTextureFromFile(wchTexFileName);
-	m_dwTriGroupCount++;
-	bResult = TRUE;
-lb_return:
-	return bResult;
+	XMFLOAT2 Scale = { m_Scale.x * pScale->x, m_Scale.y * pScale->y };
+	DrawWithTex(pCommandList, pPos, &Scale, &m_Rect, Z, m_pTexHandle);
 }
-void CBasicMeshObject::EndCreateMesh()
-{
-
-}
-void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMMATRIX* pMatWorld)
+void CSpriteObject::DrawWithTex(ID3D12GraphicsCommandList* pCommandList, const XMFLOAT2* pPos, const XMFLOAT2* pScale, const RECT* pRect, float Z, TEXTURE_HANDLE* pTexHandle)
 {
 	// 각각의 draw()작업의 무결성을 보장하려면 draw() 작업마다 다른 영역의 descriptor table(shader visible)과 다른 영역의 CBV를 사용해야 한다.
 	// 따라서 draw()할 때마다 CBV는 ConstantBuffer Pool로부터 할당받고, 렌더리용 descriptor table(shader visible)은 descriptor pool로부터 할당 받는다.
@@ -245,14 +275,34 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMMAT
 	UINT srvDescriptorSize = m_pRenderer->INL_GetSrvDescriptorSize();
 	CDescriptorPool* pDescriptorPool = m_pRenderer->INL_GetDescriptorPool();
 	ID3D12DescriptorHeap* pDescriptorHeap = pDescriptorPool->INL_GetDescriptorHeap();
-	CSimpleConstantBufferPool* pConstantBufferPool = m_pRenderer->INL_GetConstantBufferPool();
+	CSimpleConstantBufferPool* pConstantBufferPool = m_pRenderer->GetConstantBufferPool(CONSTANT_BUFFER_TYPE_SPRITE);
 	
+	UINT TexWidth = 0;
+	UINT TexHeight = 0;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE srv = {};
+	if (pTexHandle)
+	{
+		D3D12_RESOURCE_DESC desc = pTexHandle->pTexResource->GetDesc();
+		TexWidth = desc.Width;
+		TexHeight = desc.Height;
+		srv = pTexHandle->srv;
+	}
+
+	RECT rect;
+	if (!pRect)
+	{
+		rect.left = 0;
+		rect.top = 0;
+		rect.right = TexWidth;
+		rect.bottom = TexHeight;
+		pRect = &rect;
+	}
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable = {};
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescriptorTable = {};
-	DWORD dwRequiredDescriptorCount = DESCRIPTOR_COUNT_PER_OBJ + (m_dwTriGroupCount * DESCRIPTOR_COUNT_PER_TRI_GROUP);
 
-	if (!pDescriptorPool->AllocDescriptorTable(&cpuDescriptorTable, &gpuDescriptorTable, dwRequiredDescriptorCount))
+	if (!pDescriptorPool->AllocDescriptorTable(&cpuDescriptorTable, &gpuDescriptorTable, DESCRIPTOR_COUNT_FOR_DRAW))
 	{
 		__debugbreak();
 	}
@@ -263,98 +313,59 @@ void CBasicMeshObject::Draw(ID3D12GraphicsCommandList* pCommandList, const XMMAT
 	{
 		__debugbreak();
 	}
-	CONSTANT_BUFFER_DEFAULT* pConstantBufferDefault = (CONSTANT_BUFFER_DEFAULT*)pCB->pSystemMemAddr;
+	CONSTANT_BUFFER_SPRITE* pConstantBufferSprite = (CONSTANT_BUFFER_SPRITE*)pCB->pSystemMemAddr;
 
 	// constant buffer의 내용을 설정
-	// view/proj matrix
-	m_pRenderer->GetViewProjMatrix(&pConstantBufferDefault->matView, &pConstantBufferDefault->matProj);
+	pConstantBufferSprite->ScreenRes.x = (float)m_pRenderer->INL_GetScreenWidth();
+	pConstantBufferSprite->ScreenRes.y = (float)m_pRenderer->INL_GetScreenHeigt();
+	pConstantBufferSprite->Pos = *pPos;
+	pConstantBufferSprite->Scale = *pScale;
+	pConstantBufferSprite->TexSize.x = (float)TexWidth;
+	pConstantBufferSprite->TexSize.y = (float)TexHeight;
+	pConstantBufferSprite->TexSampePos.x = (float)pRect->left;
+	pConstantBufferSprite->TexSampePos.y = (float)pRect->top;
+	pConstantBufferSprite->TexSampleSize.x = (float)(pRect->right - pRect->left);
+	pConstantBufferSprite->TexSampleSize.y = (float)(pRect->bottom - pRect->top);
+	pConstantBufferSprite->Z = Z;
+	pConstantBufferSprite->Alpha = 1.0f;
+
 	
-	// world matrix
-	pConstantBufferDefault->matWorld = XMMatrixTranspose(*pMatWorld);
-
-	// Descriptor Table 구성
-	// 이번에 사용할 constant buffer의 descriptor를 렌더링용(shader visible) descriptor table에 카피
-
-	// per Obj
-	CD3DX12_CPU_DESCRIPTOR_HANDLE Dest(cpuDescriptorTable, BASIC_MESH_DESCRIPTOR_INDEX_PER_OBJ_CBV, srvDescriptorSize);
-	pD3DDeivce->CopyDescriptorsSimple(1, Dest, pCB->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);	// cpu측 코드에서는 cpu descriptor handle에만 write가능
-	Dest.Offset(1, srvDescriptorSize);
-
-	// per tri-group
-	for (DWORD i = 0; i < m_dwTriGroupCount; i++)
-	{
-		INDEXED_TRI_GROUP* pTriGroup = m_pTriGroupList + i;
-		TEXTURE_HANDLE* pTexHandle = pTriGroup->pTexHandle;
-		if (pTexHandle)
-		{
-			pD3DDeivce->CopyDescriptorsSimple(1, Dest, pTexHandle->srv, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);	// cpu측 코드에서는 cpu descriptor handle에만 write가능
-		}
-		else
-		{
-			__debugbreak();
-		}
-		Dest.Offset(1, srvDescriptorSize);
-	}
 	
 	// set RootSignature
 	pCommandList->SetGraphicsRootSignature(m_pRootSignature);
 	pCommandList->SetDescriptorHeaps(1, &pDescriptorHeap);
 
-	// ex) when TriGroupCount = 3
-	// per OBJ | TriGroup 0 | TriGroup 1 | TriGroup 2 |
-	// CBV     |     SRV    |     SRV    |     SRV    | 
+	// Descriptor Table 구성
+	// 이번에 사용할 constant buffer의 descriptor를 렌더링용(shader visible) descriptor table에 카피
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE cbvDest(cpuDescriptorTable, SPRITE_DESCRIPTOR_INDEX_CBV, srvDescriptorSize);
+	pD3DDeivce->CopyDescriptorsSimple(1, cbvDest, pCB->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	if (srv.ptr)
+	{
+		CD3DX12_CPU_DESCRIPTOR_HANDLE srvDest(cpuDescriptorTable, SPRITE_DESCRIPTOR_INDEX_TEX, srvDescriptorSize);
+		pD3DDeivce->CopyDescriptorsSimple(1, srvDest, srv, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	}
+
+	pCommandList->SetGraphicsRootDescriptorTable(0, gpuDescriptorTable);
 
 	pCommandList->SetPipelineState(m_pPipelineState);
 	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pCommandList->IASetVertexBuffers(0, 1, &m_VertexBufferView);
+	pCommandList->IASetIndexBuffer(&m_IndexBufferView);
+	pCommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-	// set descriptor table for root-param 0
-	pCommandList->SetGraphicsRootDescriptorTable(0, gpuDescriptorTable);	// Entry per Obj
-
-	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTableForTriGroup(gpuDescriptorTable, DESCRIPTOR_COUNT_PER_OBJ, srvDescriptorSize);
-	for (DWORD i = 0; i < m_dwTriGroupCount; i++)
-	{
-		// set descriptor table for root-param 1
-		pCommandList->SetGraphicsRootDescriptorTable(1, gpuDescriptorTableForTriGroup);	// Entry of Tri-Groups
-		gpuDescriptorTableForTriGroup.Offset(1, srvDescriptorSize);
-
-		INDEXED_TRI_GROUP* pTriGroup = m_pTriGroupList + i;
-		pCommandList->IASetIndexBuffer(&pTriGroup->IndexBufferView);
-		pCommandList->DrawIndexedInstanced(pTriGroup->dwTriCount * 3, 1, 0, 0, 0);
-	}
 }
 
-void CBasicMeshObject::Cleanup()
+void CSpriteObject::Cleanup()
 {
-	// delete all triangles-group
-	
-	if (m_pTriGroupList)
+	if (m_pTexHandle)
 	{
-		for (DWORD i = 0; i < m_dwTriGroupCount; i++)
-		{
-			if (m_pTriGroupList[i].pIndexBuffer)
-			{
-				m_pTriGroupList[i].pIndexBuffer->Release();
-				m_pTriGroupList[i].pIndexBuffer = nullptr;
-			}
-			if (m_pTriGroupList[i].pTexHandle)
-			{
-				m_pRenderer->DeleteTexture(m_pTriGroupList[i].pTexHandle);
-				m_pTriGroupList[i].pTexHandle = nullptr;
-			}
-		}
-		delete[] m_pTriGroupList;
-		m_pTriGroupList = nullptr;
-	}
-
-	if (m_pVertexBuffer)
-	{
-		m_pVertexBuffer->Release();
-		m_pVertexBuffer = nullptr;
+		m_pRenderer->DeleteTexture(m_pTexHandle);
+		m_pTexHandle = nullptr;
 	}
 	CleanupSharedResources();
 }
-void CBasicMeshObject::CleanupSharedResources()
+void CSpriteObject::CleanupSharedResources()
 {
 	if (!m_dwInitRefCount)
 		return;
@@ -372,9 +383,19 @@ void CBasicMeshObject::CleanupSharedResources()
 			m_pPipelineState->Release();
 			m_pPipelineState = nullptr;
 		}
+		if (m_pVertexBuffer)
+		{
+			m_pVertexBuffer->Release();
+			m_pVertexBuffer = nullptr;
+		}
+		if (m_pIndexBuffer)
+		{
+			m_pIndexBuffer->Release();
+			m_pIndexBuffer = nullptr;
+		}
 	}
 }
-CBasicMeshObject::~CBasicMeshObject()
+CSpriteObject::~CSpriteObject()
 {
 	Cleanup();
 }

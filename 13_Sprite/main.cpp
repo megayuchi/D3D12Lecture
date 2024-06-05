@@ -71,6 +71,13 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 CD3D12Renderer* g_pRenderer = nullptr;
 void* g_pMeshObj0 = nullptr;
 void* g_pMeshObj1 = nullptr;
+void* g_pSpriteObjCommon = nullptr;
+void* g_pSpriteObj0 = nullptr;
+void* g_pSpriteObj1 = nullptr;
+void* g_pSpriteObj2 = nullptr;
+void* g_pSpriteObj3 = nullptr;
+void* g_pTexHandle0 = nullptr;
+
 
 float g_fRot0 = 0.0f;
 float g_fRot1 = 0.0f;
@@ -125,8 +132,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 
 	g_pRenderer = new CD3D12Renderer;
-	//g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
-	g_pRenderer->Initialize(g_hMainWindow, FALSE, FALSE);
+	g_pRenderer->Initialize(g_hMainWindow, TRUE, TRUE);
+	//g_pRenderer->Initialize(g_hMainWindow, FALSE, FALSE);
 
 	// Create Box Mesh
 	g_pMeshObj0 = CreateBoxMeshObject();
@@ -134,6 +141,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// create Triangle mesh
 	g_pMeshObj1 = CreateQuadMesh();
 
+	// create sprite
+	g_pTexHandle0 = g_pRenderer->CreateTextureFromFile(L"tex_00.dds");
+	g_pSpriteObjCommon = g_pRenderer->CreateSpriteObject();
+
+	g_pSpriteObj0 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 0, 0, 512, 512);
+	g_pSpriteObj1 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 512, 0, 1024, 512);
+	g_pSpriteObj2 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 0, 512, 512, 1024);
+	g_pSpriteObj3 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 512, 512, 1024, 1024);
 
 	SetWindowText(g_hMainWindow, L"MultiMaterial");
 	// Main message loop:
@@ -178,6 +193,36 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		g_pRenderer->DeleteBasicMeshObject(g_pMeshObj1);
 		g_pMeshObj1 = nullptr;
+	}
+	if (g_pTexHandle0)
+	{
+		g_pRenderer->DeleteTexture(g_pTexHandle0);
+		g_pTexHandle0 = nullptr;
+	}
+	if (g_pSpriteObjCommon)
+	{
+		g_pRenderer->DeleteSpriteObject(g_pSpriteObjCommon);
+		g_pSpriteObjCommon = nullptr;
+	}
+	if (g_pSpriteObj0)
+	{
+		g_pRenderer->DeleteSpriteObject(g_pSpriteObj0);
+		g_pSpriteObj0 = nullptr;
+	}
+	if (g_pSpriteObj1)
+	{
+		g_pRenderer->DeleteSpriteObject(g_pSpriteObj1);
+		g_pSpriteObj1 = nullptr;
+	}
+	if (g_pSpriteObj2)
+	{
+		g_pRenderer->DeleteSpriteObject(g_pSpriteObj2);
+		g_pSpriteObj2 = nullptr;
+	}
+	if (g_pSpriteObj3)
+	{
+		g_pRenderer->DeleteSpriteObject(g_pSpriteObj3);
+		g_pSpriteObj3 = nullptr;
 	}
 	if (g_pRenderer)
 	{
@@ -279,7 +324,40 @@ void RunGame()
 
 	// 다른 오브젝트를 렌더링
 	g_pRenderer->RenderMeshObject(g_pMeshObj1, &g_matWorld2);
-	
+
+	// 스프라이트 렌더링
+	RECT rect;
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = 256;
+	rect.bottom = 256;
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 0, 0, 0.5f, 0.5f, &rect, 0.0f, g_pTexHandle0);
+
+	rect.left = 256;
+	rect.top = 0;
+	rect.right = 512;
+	rect.bottom = 256;
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 256 + 5, 0, 0.5f, 0.5f, &rect, 0.0f, g_pTexHandle0);
+
+	rect.left = 0;
+	rect.top = 256;
+	rect.right = 256;
+	rect.bottom = 512;
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 0, 256 + 5, 0.5f, 0.5f, &rect, 0.0f, g_pTexHandle0);
+
+	rect.left = 256;
+	rect.top = 256;
+	rect.right = 512;
+	rect.bottom = 512;
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 256 + 5, 256 + 5, 0.5f, 0.5f, &rect, 0.0f, g_pTexHandle0);
+
+	//g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 512 + 10, 0, 1.0f, 1.0f, nullptr, 1.0f, g_pTexHandle0);
+
+	g_pRenderer->RenderSprite(g_pSpriteObj0, 512 + 10, 0, 0.5f, 0.5f, 0.0f);
+	g_pRenderer->RenderSprite(g_pSpriteObj1, 512 + 10 + 10 + 256, 0, 0.5f, 0.5f, 0.0f);
+	g_pRenderer->RenderSprite(g_pSpriteObj2, 512 + 10, 256 + 10, 0.5f, 0.5f, 0.0f);
+	g_pRenderer->RenderSprite(g_pSpriteObj3, 512 + 10 + 10 + 256, 256 + 10, 0.5f, 0.5f, 0.0f);
+
 	// end
 	g_pRenderer->EndRender();
 
