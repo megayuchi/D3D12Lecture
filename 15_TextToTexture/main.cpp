@@ -16,10 +16,10 @@ using namespace DirectX;
 #pragma comment(lib, "DXGI.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "D3D12.lib")
+#pragma comment( lib, "d3d11.lib" )
 #pragma comment(lib, "D3DCompiler.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
-
 
 #if defined(_M_ARM64EC) || defined(_M_ARM64)
 	#ifdef _DEBUG
@@ -47,7 +47,7 @@ extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // D3D12 Agility SDK Runtime
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 613; }	
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 614; }	
 
 #if defined(_M_ARM64EC)
 	extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\D3D12\\arm64\\"; }
@@ -77,6 +77,18 @@ void* g_pSpriteObj1 = nullptr;
 void* g_pSpriteObj2 = nullptr;
 void* g_pSpriteObj3 = nullptr;
 void* g_pTexHandle0 = nullptr;
+void* g_pDynamicTexHandle = nullptr;
+
+BYTE* g_pImage = nullptr;
+UINT g_ImageWidth = 0;
+UINT g_ImageHeight = 0;
+
+BYTE* g_pTextImage = nullptr;
+UINT g_TextImageWidth = 0;
+UINT g_TextImageHeight = 0;
+void* g_pTextTexTexHandle = nullptr;
+void* g_pFontObj = nullptr;
+
 
 
 float g_fRot0 = 0.0f;
@@ -90,6 +102,8 @@ XMMATRIX g_matWorld2 = {};
 ULONGLONG g_PrvFrameCheckTick = 0;
 ULONGLONG g_PrvUpdateTick = 0;
 DWORD	g_FrameCount = 0;
+DWORD	g_FPS = 0;
+WCHAR g_wchText[64] = {};
 
 void RunGame();
 void Update();
@@ -141,7 +155,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// create Triangle mesh
 	g_pMeshObj1 = CreateQuadMesh();
 
+	// Create Font
+	g_pFontObj = g_pRenderer->CreateFontObject(L"Tahoma", 18.0f);
 	// create sprite
+	
+	// create texture for dynamic texture
+	g_ImageWidth = 512;
+	g_ImageHeight = 256;
+	g_pImage = (BYTE*)malloc(g_ImageWidth * g_ImageHeight * 4);
+	DWORD* pDest = (DWORD*)g_pImage;
+	for (DWORD y = 0; y < g_ImageHeight; y++)
+	{
+		for (DWORD x = 0; x < g_ImageWidth; x++)
+		{
+			pDest[x + g_ImageWidth * y] = 0xff0000ff;
+		}
+	}
+	g_pDynamicTexHandle = g_pRenderer->CreateDynamicTexture(g_ImageWidth, g_ImageHeight);
+
+	// create texture for draw text
+	g_TextImageWidth = 512;
+	g_TextImageHeight = 256;
+	g_pTextImage = (BYTE*)malloc(g_TextImageWidth * g_TextImageHeight * 4);
+	g_pTextTexTexHandle = g_pRenderer->CreateDynamicTexture(g_TextImageWidth, g_TextImageHeight);
+
+	// create immutable textures from file
 	g_pTexHandle0 = g_pRenderer->CreateTextureFromFile(L"tex_00.dds");
 	g_pSpriteObjCommon = g_pRenderer->CreateSpriteObject();
 
@@ -150,7 +188,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_pSpriteObj2 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 0, 512, 512, 1024);
 	g_pSpriteObj3 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 512, 512, 1024, 1024);
 
-	SetWindowText(g_hMainWindow, L"Sprite");
+	SetWindowText(g_hMainWindow, L"TextToTexture");
 	// Main message loop:
 	//while (GetMessage(&msg, nullptr, 0, 0))
 	//{
@@ -184,6 +222,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			RunGame();
 		}
 	}
+	if (g_pFontObj)
+	{
+		g_pRenderer->DeleteFontObject(g_pFontObj);
+		g_pFontObj = nullptr;
+	}
 	if (g_pMeshObj0)
 	{
 		g_pRenderer->DeleteBasicMeshObject(g_pMeshObj0);
@@ -198,6 +241,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		g_pRenderer->DeleteTexture(g_pTexHandle0);
 		g_pTexHandle0 = nullptr;
+	}
+	if (g_pDynamicTexHandle)
+	{
+		g_pRenderer->DeleteTexture(g_pDynamicTexHandle);
+		g_pDynamicTexHandle = nullptr;
+	}
+	if (g_pTextTexTexHandle)
+	{
+		g_pRenderer->DeleteTexture(g_pTextTexTexHandle);
+		g_pTextTexTexHandle = nullptr;
+	}
+	if (g_pImage)
+	{
+		free(g_pImage);
+		g_pImage = nullptr;
+	}
+	if (g_pTextImage)
+	{
+		free(g_pTextImage);
+		g_pTextImage = nullptr;
 	}
 	if (g_pSpriteObjCommon)
 	{
@@ -351,6 +414,12 @@ void RunGame()
 	rect.bottom = 512;
 	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 256 + 5, 256 + 5, 0.5f, 0.5f, &rect, 0.0f, g_pTexHandle0);
 
+	// render dynamic texture
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 0, 256 + 5 + 256 + 5, 1.0f, 1.0f, nullptr, 0.0f, g_pDynamicTexHandle);
+
+	// render dynamic texture as text
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 512 + 5, 256 + 5 + 256 + 5, 1.0f, 1.0f, nullptr, 0.0f, g_pTextTexTexHandle);
+
 	//g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 512 + 10, 0, 1.0f, 1.0f, nullptr, 1.0f, g_pTexHandle0);
 
 	g_pRenderer->RenderSprite(g_pSpriteObj0, 512 + 10, 0, 0.5f, 0.5f, 1.0f);
@@ -369,7 +438,8 @@ void RunGame()
 		g_PrvFrameCheckTick = CurTick;	
 				
 		WCHAR wchTxt[64];
-		swprintf_s(wchTxt, L"FPS:%u", g_FrameCount);
+		g_FPS = g_FrameCount;
+		swprintf_s(wchTxt, L"FPS:%u", g_FPS);
 		SetWindowText(g_hMainWindow, wchTxt);
 				
 		g_FrameCount = 0;
@@ -440,6 +510,89 @@ void Update()
 	if (g_fRot2 > 2.0f * 3.1415f)
 	{
 		g_fRot2 = 0.0f;
+	}
+
+	// Update Texture
+	static DWORD g_dwCount = 0;
+	static DWORD g_dwTileColorR = 0;
+	static DWORD g_dwTileColorG = 0;
+	static DWORD g_dwTileColorB = 0;
+
+	const DWORD TILE_WIDTH = 16;
+	const DWORD TILE_HEIGHT = 16;
+
+	DWORD TILE_WIDTH_COUNT = g_ImageWidth / TILE_WIDTH;
+	DWORD TILE_HEIGHT_COUNT = g_ImageHeight / TILE_HEIGHT;
+
+	if (g_dwCount >= TILE_WIDTH_COUNT * TILE_HEIGHT_COUNT)
+	{
+		g_dwCount = 0;
+	}
+	DWORD TileY = g_dwCount / TILE_WIDTH_COUNT;
+	DWORD TileX = g_dwCount % TILE_WIDTH_COUNT;
+
+	DWORD StartX = TileX * TILE_WIDTH;
+	DWORD StartY = TileY * TILE_HEIGHT;
+
+
+	//DWORD r = rand() % 256;
+	//DWORD g = rand() % 256;
+	//DWORD b = rand() % 256;
+
+	DWORD r = g_dwTileColorR;
+	DWORD g = g_dwTileColorG;
+	DWORD b = g_dwTileColorB;
+
+
+	DWORD* pDest = (DWORD*)g_pImage;
+	for (DWORD y = 0; y < TILE_HEIGHT; y++)
+	{
+		for (DWORD x = 0; x < TILE_WIDTH; x++)
+		{
+			if (StartX + x >= g_ImageWidth)
+				__debugbreak();
+
+			if (StartY + y >= g_ImageHeight)
+				__debugbreak();
+
+			pDest[(StartX + x) + (StartY + y) * g_ImageWidth] = 0xff000000 | (b << 16) | (g << 8) | r;
+		}
+	}
+	g_dwCount++;
+	g_dwTileColorR += 8;
+	if (g_dwTileColorR > 255)
+	{
+		g_dwTileColorR = 0;
+		g_dwTileColorG += 8;
+	}
+	if (g_dwTileColorG > 255)
+	{
+		g_dwTileColorG = 0;
+		g_dwTileColorB += 8;
+	}
+	if (g_dwTileColorB > 255)
+	{
+		g_dwTileColorB = 0;
+	}
+	g_pRenderer->UpdateTextureWithImage(g_pDynamicTexHandle, g_pImage, g_ImageWidth, g_ImageHeight);	
+
+	// draw text
+	int iTextWidth = 0;
+	int iTextHeight = 0;
+	WCHAR	wchTxt[64] = {};
+	DWORD	dwTxtLen = swprintf_s(wchTxt, L"Current FrameRate: %u", g_FPS);
+
+	if (wcscmp(g_wchText, wchTxt))
+	{
+		// 텍스트가 변경된 경우
+		g_pRenderer->WriteTextToBitmap(g_pTextImage, g_TextImageWidth, g_TextImageHeight, g_TextImageWidth * 4, &iTextWidth, &iTextHeight, g_pFontObj, wchTxt, dwTxtLen);
+		g_pRenderer->UpdateTextureWithImage(g_pTextTexTexHandle, g_pTextImage, g_TextImageWidth, g_TextImageHeight);
+		wcscpy_s(g_wchText, wchTxt);
+	}
+	else
+	{
+		// 텍스트가 변경되지 않은 경우 - 업데이트 할 필요 없다.
+		int a = 0;
 	}
 }
 //

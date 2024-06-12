@@ -47,7 +47,7 @@ extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // D3D12 Agility SDK Runtime
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 613; }	
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 614; }	
 
 #if defined(_M_ARM64EC)
 	extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\D3D12\\arm64\\"; }
@@ -77,6 +77,12 @@ void* g_pSpriteObj1 = nullptr;
 void* g_pSpriteObj2 = nullptr;
 void* g_pSpriteObj3 = nullptr;
 void* g_pTexHandle0 = nullptr;
+void* g_pDynamicTexHandle = nullptr;
+BYTE* g_pImage = nullptr;
+UINT g_ImageWidth = 0;
+UINT g_ImageHeight = 0;
+
+
 
 
 float g_fRot0 = 0.0f;
@@ -142,6 +148,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_pMeshObj1 = CreateQuadMesh();
 
 	// create sprite
+	
+	g_ImageWidth = 512;
+	g_ImageHeight = 256;
+	g_pImage = (BYTE*)malloc(g_ImageWidth * g_ImageHeight * 4);
+	DWORD* pDest = (DWORD*)g_pImage;
+	for (DWORD y = 0; y < g_ImageHeight; y++)
+	{
+		for (DWORD x = 0; x < g_ImageWidth; x++)
+		{
+			pDest[x + g_ImageWidth * y] = 0xff0000ff;
+		}
+	}
+	g_pDynamicTexHandle = g_pRenderer->CreateDynamicTexture(g_ImageWidth, g_ImageHeight);
+
 	g_pTexHandle0 = g_pRenderer->CreateTextureFromFile(L"tex_00.dds");
 	g_pSpriteObjCommon = g_pRenderer->CreateSpriteObject();
 
@@ -150,7 +170,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_pSpriteObj2 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 0, 512, 512, 1024);
 	g_pSpriteObj3 = g_pRenderer->CreateSpriteObject(L"sprite_1024x1024.dds", 512, 512, 1024, 1024);
 
-	SetWindowText(g_hMainWindow, L"Sprite");
+	SetWindowText(g_hMainWindow, L"DynamicTexture");
 	// Main message loop:
 	//while (GetMessage(&msg, nullptr, 0, 0))
 	//{
@@ -198,6 +218,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		g_pRenderer->DeleteTexture(g_pTexHandle0);
 		g_pTexHandle0 = nullptr;
+	}
+	if (g_pDynamicTexHandle)
+	{
+		g_pRenderer->DeleteTexture(g_pDynamicTexHandle);
+		g_pDynamicTexHandle = nullptr;
+	}
+	if (g_pImage)
+	{
+		free(g_pImage);
+		g_pImage = nullptr;
 	}
 	if (g_pSpriteObjCommon)
 	{
@@ -351,6 +381,10 @@ void RunGame()
 	rect.bottom = 512;
 	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 256 + 5, 256 + 5, 0.5f, 0.5f, &rect, 0.0f, g_pTexHandle0);
 
+	// render dynamic texture
+	g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 0, 256 + 5 + 256 + 5, 0.5f, 0.5f, nullptr, 0.0f, g_pDynamicTexHandle);
+
+
 	//g_pRenderer->RenderSpriteWithTex(g_pSpriteObjCommon, 512 + 10, 0, 1.0f, 1.0f, nullptr, 1.0f, g_pTexHandle0);
 
 	g_pRenderer->RenderSprite(g_pSpriteObj0, 512 + 10, 0, 0.5f, 0.5f, 1.0f);
@@ -441,6 +475,70 @@ void Update()
 	{
 		g_fRot2 = 0.0f;
 	}
+
+	// Update Texture
+	static DWORD g_dwCount = 0;
+	static DWORD g_dwTileColorR = 0;
+	static DWORD g_dwTileColorG = 0;
+	static DWORD g_dwTileColorB = 0;
+
+	const DWORD TILE_WIDTH = 16;
+	const DWORD TILE_HEIGHT = 16;
+
+	DWORD TILE_WIDTH_COUNT = g_ImageWidth / TILE_WIDTH;
+	DWORD TILE_HEIGHT_COUNT = g_ImageHeight / TILE_HEIGHT;
+
+	if (g_dwCount >= TILE_WIDTH_COUNT * TILE_HEIGHT_COUNT)
+	{
+		g_dwCount = 0;
+	}
+	DWORD TileY = g_dwCount / TILE_WIDTH_COUNT;
+	DWORD TileX = g_dwCount % TILE_WIDTH_COUNT;
+
+	DWORD StartX = TileX * TILE_WIDTH;
+	DWORD StartY = TileY * TILE_HEIGHT;
+
+
+	//DWORD r = rand() % 256;
+	//DWORD g = rand() % 256;
+	//DWORD b = rand() % 256;
+
+	DWORD r = g_dwTileColorR;
+	DWORD g = g_dwTileColorG;
+	DWORD b = g_dwTileColorB;
+
+
+	DWORD* pDest = (DWORD*)g_pImage;
+	for (DWORD y = 0; y < 16; y++)
+	{
+		for (DWORD x = 0; x < 16; x++)
+		{
+			if (StartX + x >= g_ImageWidth)
+				__debugbreak();
+
+			if (StartY + y >= g_ImageHeight)
+				__debugbreak();
+
+			pDest[(StartX + x) + (StartY + y) * g_ImageWidth] = 0xff000000 | (b << 16) | (g << 8) | r;
+		}
+	}
+	g_dwCount++;
+	g_dwTileColorR += 8;
+	if (g_dwTileColorR > 255)
+	{
+		g_dwTileColorR = 0;
+		g_dwTileColorG += 8;
+	}
+	if (g_dwTileColorG > 255)
+	{
+		g_dwTileColorG = 0;
+		g_dwTileColorB += 8;
+	}
+	if (g_dwTileColorB > 255)
+	{
+		g_dwTileColorB = 0;
+	}
+	g_pRenderer->UpdateTextureWithImage(g_pDynamicTexHandle, g_pImage, g_ImageWidth, g_ImageHeight);
 }
 //
 //  FUNCTION: MyRegisterClass()

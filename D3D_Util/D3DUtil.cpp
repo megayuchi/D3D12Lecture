@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <dxgi1_4.h>
 #include <d3d12.h>
+#include <d3dx12.h>
 #include "D3DUtil.h"
 
 
@@ -131,4 +132,40 @@ HRESULT CreateVertexBuffer(ID3D12Device* pDevice, UINT SizePerVertex, DWORD dwVe
 
 lb_return:
 	return hr;
+}
+
+
+void UpdateTexture(ID3D12Device* pD3DDevice, ID3D12GraphicsCommandList* pCommandList, ID3D12Resource* pDestTexResource, ID3D12Resource* pSrcTexResource)
+{
+	const DWORD MAX_SUB_RESOURCE_NUM = 32;
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT Footprint[MAX_SUB_RESOURCE_NUM] = {};
+	UINT	Rows[MAX_SUB_RESOURCE_NUM] = {};
+	UINT64	RowSize[MAX_SUB_RESOURCE_NUM] = {};
+	UINT64	TotalBytes = 0;
+
+	D3D12_RESOURCE_DESC Desc = pDestTexResource->GetDesc();
+	if (Desc.MipLevels > (UINT)_countof(Footprint))
+		__debugbreak();
+
+	pD3DDevice->GetCopyableFootprints(&Desc, 0, Desc.MipLevels, 0, Footprint, Rows, RowSize, &TotalBytes);
+
+	pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pDestTexResource, D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
+	for (DWORD i = 0; i < Desc.MipLevels; i++)
+	{
+
+		D3D12_TEXTURE_COPY_LOCATION	destLocation = {};
+		destLocation.PlacedFootprint = Footprint[i];
+		destLocation.pResource = pDestTexResource;
+		destLocation.SubresourceIndex = i;
+		destLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+		D3D12_TEXTURE_COPY_LOCATION	srcLocation = {};
+		srcLocation.PlacedFootprint = Footprint[i];
+		srcLocation.pResource = pSrcTexResource;
+		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+
+		pCommandList->CopyTextureRegion(&destLocation, 0, 0, 0, &srcLocation, nullptr);
+	}
+	pCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pDestTexResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE));
+
 }
