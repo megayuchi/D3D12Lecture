@@ -17,7 +17,7 @@ BOOL CTextureManager::Initialize(CD3D12Renderer* pRenderer, DWORD dwMaxBucketNum
 	m_pResourceManager = pRenderer->INL_GetResourceManager();
 
 	m_pHashTable = new CHashTable;
-	m_pHashTable->Initialize(dwMaxBucketNum, _MAX_PATH, dwMaxFileNum);
+	m_pHashTable->Initialize(dwMaxBucketNum, _MAX_PATH * sizeof(WCHAR), dwMaxFileNum);
 
 	return TRUE;
 }
