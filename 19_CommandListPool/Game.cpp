@@ -23,6 +23,7 @@ BOOL CGame::Initialiize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV)
 	m_TextImageHeight = 256;
 	m_pTextImage = (BYTE*)malloc(m_TextImageWidth * m_TextImageHeight * 4);
 	m_pTextTexTexHandle = m_pRenderer->CreateDynamicTexture(m_TextImageWidth, m_TextImageHeight);
+	memset(m_pTextImage, 0, m_TextImageWidth * m_TextImageHeight * 4);
 
 	m_pSpriteObjCommon = m_pRenderer->CreateSpriteObject();
 
@@ -172,6 +173,7 @@ BOOL CGame::Update(ULONGLONG CurTick)
 	if (wcscmp(m_wchText, wchTxt))
 	{
 		// 텍스트가 변경된 경우
+		memset(m_pTextImage, 0, m_TextImageWidth * m_TextImageHeight * 4);
 		m_pRenderer->WriteTextToBitmap(m_pTextImage, m_TextImageWidth, m_TextImageHeight, m_TextImageWidth * 4, &iTextWidth, &iTextHeight, m_pFontObj, wchTxt, dwTxtLen);
 		m_pRenderer->UpdateTextureWithImage(m_pTextTexTexHandle, m_pTextImage, m_TextImageWidth, m_TextImageHeight);
 		wcscpy_s(m_wchText, wchTxt);

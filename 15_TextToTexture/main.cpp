@@ -177,6 +177,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_TextImageWidth = 512;
 	g_TextImageHeight = 256;
 	g_pTextImage = (BYTE*)malloc(g_TextImageWidth * g_TextImageHeight * 4);
+	memset(g_pTextImage, 0, g_TextImageWidth * g_TextImageHeight * 4);
 	g_pTextTexTexHandle = g_pRenderer->CreateDynamicTexture(g_TextImageWidth, g_TextImageHeight);
 
 	// create immutable textures from file
@@ -585,6 +586,7 @@ void Update()
 	if (wcscmp(g_wchText, wchTxt))
 	{
 		// 텍스트가 변경된 경우
+		memset(g_pTextImage, 0, g_TextImageWidth * g_TextImageHeight * 4);
 		g_pRenderer->WriteTextToBitmap(g_pTextImage, g_TextImageWidth, g_TextImageHeight, g_TextImageWidth * 4, &iTextWidth, &iTextHeight, g_pFontObj, wchTxt, dwTxtLen);
 		g_pRenderer->UpdateTextureWithImage(g_pTextTexTexHandle, g_pTextImage, g_TextImageWidth, g_TextImageHeight);
 		wcscpy_s(g_wchText, wchTxt);
