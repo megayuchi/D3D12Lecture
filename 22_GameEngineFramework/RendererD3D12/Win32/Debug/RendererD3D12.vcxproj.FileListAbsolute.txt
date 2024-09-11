@@ -1,0 +1,4 @@
+C:\DEV\DAIKON_ROOT\D3D12Lecture\22_GameEngineFramework\DLL\D3D12\D3D12Core.dll
+C:\DEV\DAIKON_ROOT\D3D12Lecture\22_GameEngineFramework\DLL\D3D12\D3D12Core.pdb
+C:\DEV\DAIKON_ROOT\D3D12Lecture\22_GameEngineFramework\DLL\D3D12\D3D12SDKLayers.dll
+C:\DEV\DAIKON_ROOT\D3D12Lecture\22_GameEngineFramework\DLL\D3D12\D3D12SDKLayers.pdb

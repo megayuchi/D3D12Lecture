@@ -47,7 +47,7 @@ extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // D3D12 Agility SDK Runtime
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 613; }	
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 614; }	
 
 #if defined(_M_ARM64EC)
 	extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\D3D12\\arm64\\"; }
@@ -356,7 +356,7 @@ void RunGame()
 	g_pRenderer->RenderSprite(g_pSpriteObj0, 512 + 10, 0, 0.5f, 0.5f, 1.0f);
 	g_pRenderer->RenderSprite(g_pSpriteObj1, 512 + 10 + 10 + 256, 0, 0.5f, 0.5f, 1.0f);
 	g_pRenderer->RenderSprite(g_pSpriteObj2, 512 + 10, 256 + 10, 0.5f, 0.5f, 1.0f);
-	g_pRenderer->RenderSprite(g_pSpriteObj3, 512 + 10 + 10 + 256, 256 + 10, 0.5f, 0.5f, 1.0f);
+	g_pRenderer->RenderSprite(g_pSpriteObj3, 512 + 10 + 10 + 256, 256 + 10, 0.5f, 0.5f, 0.0f);
 
 	// end
 	g_pRenderer->EndRender();

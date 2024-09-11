@@ -1,0 +1,15 @@
+Build Renderer(.DLL)
+1.Load the RendererD3D12\RendererD3D12.sln project in Visual Studio.
+2.Right-click on top solution in solution explorer.
+3.Click ‘Restore NuGet Packages’.
+4.Build.
+5.Copy the arm, arm64, win32, x64 folders from 'RendererD3D12\packages\Microsoft.Direct3D.D3D12.xxxxx\build\native\bin' to the 'App\D3D12' folder in the project folder.
+
+Build App(.exe)
+1.Load the App\App.sln project in Visual Studio.
+2.Build.
+3.Set Property Page->Debugging->Working Directory to '$(OutDir)'
+4.Run and Debug.
+
+
+

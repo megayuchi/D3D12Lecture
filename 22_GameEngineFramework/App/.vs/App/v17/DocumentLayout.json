@@ -1,0 +1,86 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4883B848-6E3B-4A51-8E6D-13A492EA46F0}|App.vcxproj|C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\GameObject.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4883B848-6E3B-4A51-8E6D-13A492EA46F0}|App.vcxproj|solutionrelative:GameObject.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4883B848-6E3B-4A51-8E6D-13A492EA46F0}|App.vcxproj|C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4883B848-6E3B-4A51-8E6D-13A492EA46F0}|App.vcxproj|solutionrelative:Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4883B848-6E3B-4A51-8E6D-13A492EA46F0}|App.vcxproj|C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\GameObject.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4883B848-6E3B-4A51-8E6D-13A492EA46F0}|App.vcxproj|solutionrelative:GameObject.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{65ddf8c3-8f89-4077-a6c6-dbb8853aab13}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{809f6ff3-8092-454a-8003-6d4091f9b5bb}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Game.cpp",
+              "DocumentMoniker": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\Game.cpp",
+              "RelativeDocumentMoniker": "Game.cpp",
+              "ToolTip": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\Game.cpp",
+              "RelativeToolTip": "Game.cpp",
+              "ViewState": "AgIAABwAAAAAAAAAAAAAwGAAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-07-20T06:45:31.935Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "GameObject.h",
+              "DocumentMoniker": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\GameObject.h",
+              "RelativeDocumentMoniker": "GameObject.h",
+              "ToolTip": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\GameObject.h",
+              "RelativeToolTip": "GameObject.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-07-20T06:47:51.68Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GameObject.cpp",
+              "DocumentMoniker": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\GameObject.cpp",
+              "RelativeDocumentMoniker": "GameObject.cpp",
+              "ToolTip": "C:\\DEV\\DAIKON_ROOT\\D3D12Lecture\\22_GameEngineFramework\\App\\GameObject.cpp",
+              "RelativeToolTip": "GameObject.cpp",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAowGkAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-07-20T06:45:29.945Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{99b8fa2f-ab90-4f57-9c32-949f146f1914}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
