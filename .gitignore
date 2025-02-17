@@ -1,9 +1,3 @@
-# included folder
-!DirectXTex/DirectXTex/Bin/Desktop_2022/
-!DirectXTex/DirectXTex/Bin/Desktop_2022/**
-!D3D12/
-!D3D12/**
-
 # Prerequisites
 *.d
 
