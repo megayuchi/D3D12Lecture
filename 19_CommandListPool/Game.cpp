@@ -9,7 +9,7 @@ CGame::CGame()
 {
 
 }
-BOOL CGame::Initialiize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV)
+BOOL CGame::Initialize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV)
 {
 	m_pRenderer = new CD3D12Renderer;
 	m_pRenderer->Initialize(hWnd, bEnableDebugLayer, bEnableGBV);

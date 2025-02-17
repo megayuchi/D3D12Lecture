@@ -48,7 +48,7 @@ extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // D3D12 Agility SDK Runtime
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 614; }	
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 615; }	
 
 #if defined(_M_ARM64EC)
 	extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\D3D12\\arm64\\"; }
@@ -109,7 +109,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_pGame = new CGame;
 	//g_pGame->Initialiize(g_hMainWindow, TRUE, TRUE);
-	g_pGame->Initialiize(g_hMainWindow, FALSE, FALSE);
+	g_pGame->Initialize(g_hMainWindow, FALSE, FALSE);
 
 	SetWindowText(g_hMainWindow, L"MultiThreadRender");
 	// Main message loop:

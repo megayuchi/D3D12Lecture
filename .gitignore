@@ -43,6 +43,7 @@
 
 # folders
 .vs/
+packages/
 
 # specific files
 del_not_needed_folder.bat
@@ -75,3 +76,4 @@ update_to_git.bat
 /22_GameEngineFramework/App/.vs
 /22_GameEngineFramework/App/.vs
 /22_GameEngineFramework/App/.vs
+del_not_needed_folder직업호출하지말것\!\!\!.txt

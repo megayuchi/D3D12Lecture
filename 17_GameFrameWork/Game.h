@@ -42,7 +42,7 @@ class CGame
 
 	void	Cleanup();
 public:
-	BOOL	Initialiize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV);
+	BOOL	Initialize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV);
 	void	Run();
 	BOOL	Update(ULONGLONG CurTick);
 	void	OnKeyDown(UINT nChar, UINT uiScanCode);

@@ -1,0 +1,6 @@
+LIBRARY     RendererD3D12
+
+DESCRIPTION 'D3D12 Renderer 2024. megayuchi'
+
+EXPORTS
+	DllCreateInstance	PRIVATE

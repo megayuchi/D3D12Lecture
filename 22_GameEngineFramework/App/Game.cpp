@@ -13,7 +13,7 @@ CGame::CGame()
 {
 
 }
-BOOL CGame::Initialiize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV)
+BOOL CGame::Initialize(HWND hWnd, BOOL bEnableDebugLayer, BOOL bEnableGBV)
 {
 	const WCHAR* wchRendererFileName = nullptr;
 
