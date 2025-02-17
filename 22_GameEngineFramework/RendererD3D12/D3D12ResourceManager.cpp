@@ -7,8 +7,8 @@
 #include "../Common/typedef.h"
 
 // include DirectXTex
-#include "../DirectXTex/DirectXTex/dds.h"
-#include "../DirectXTex/DirectXTex/DirectXTex.h"
+#include "../../DirectXTex/DirectXTex/dds.h"
+#include "../../DirectXTex/DirectXTex/DirectXTex.h"
 #include "DDSTextureLoader12.h"
 
 #include "D3D12ResourceManager.h"

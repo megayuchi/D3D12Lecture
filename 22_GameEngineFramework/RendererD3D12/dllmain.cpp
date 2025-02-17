@@ -13,21 +13,21 @@
 
 #if defined(_M_ARM64EC) || defined(_M_ARM64)
 #ifdef _DEBUG
-#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/ARM64/debug/DirectXTex.lib")
+#pragma comment(lib, "../../DirectXTex/DirectXTex/Bin/Desktop_2022/ARM64/debug/DirectXTex.lib")
 #else
-#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/ARM64/release/DirectXTex.lib")
+#pragma comment(lib, "../../DirectXTex/DirectXTex/Bin/Desktop_2022/ARM64/release/DirectXTex.lib")
 #endif
 #elif defined(_M_AMD64)
 #ifdef _DEBUG
-#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/debug/DirectXTex.lib")
+#pragma comment(lib, "../../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/debug/DirectXTex.lib")
 #else
-#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/release/DirectXTex.lib")
+#pragma comment(lib, "../../DirectXTex/DirectXTex/Bin/Desktop_2022/x64/release/DirectXTex.lib")
 #endif
 #elif defined(_M_IX86)
 #ifdef _DEBUG
-#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/win32/debug/DirectXTex.lib")
+#pragma comment(lib, "../../DirectXTex/DirectXTex/Bin/Desktop_2022/win32/debug/DirectXTex.lib")
 #else
-#pragma comment(lib, "../DirectXTex/DirectXTex/Bin/Desktop_2022/win32/release/DirectXTex.lib")
+#pragma comment(lib, "../../DirectXTex/DirectXTex/Bin/Desktop_2022/win32/release/DirectXTex.lib")
 #endif
 #endif
 

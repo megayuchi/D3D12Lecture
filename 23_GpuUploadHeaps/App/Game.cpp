@@ -9,7 +9,7 @@
 #include "Game.h"
 #include <shlwapi.h>
 
-//#define USE_GPU_UPLOAD_HEAPS
+#define USE_GPU_UPLOAD_HEAPS
 
 CGame::CGame()
 {
