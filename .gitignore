@@ -1,3 +1,9 @@
+# included folder
+!DirectXTex/DirectXTex/Bin/Desktop_2022/
+!DirectXTex/DirectXTex/Bin/Desktop_2022/**
+!D3D12/
+!D3D12/**
+
 # Prerequisites
 *.d
 
@@ -23,7 +29,6 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
@@ -43,10 +48,6 @@
 # folders
 .vs/
 packages/
-debug/
-release/
-x64/
-win32/
 
 # specific files
 del_not_needed_folder.bat
@@ -90,20 +91,9 @@ update_to_git.bat# Prerequisites
 *.user
 *.vssscc
 
-# folders
-.vs/
-packages/
-debug/
-release/
-x64/
-win32/
-
 # specific files
 del_not_needed_folder.bat
 update_to_git.bat
 del_not_needed_folder직업호출하지말것\!\!\!.txt
 
-# included folder
-!DirectXTex/DirectXTex/Bin/Desktop_2022/
-!D3D12/
 
