@@ -44,36 +44,18 @@
 # folders
 .vs/
 packages/
+debug/
+release/
+x64/
+win32/
 
 # specific files
 del_not_needed_folder.bat
 update_to_git.bat
 
+# included folder
+!DirectXTex/DirectXTex/Bin/Desktop_2022
+
+
 # specific folders
-/02_DrawTriangle/02_DrawTriangle/x64
-/01_CreateDevice/01_CreateDevice/x64
-/03_Texture/03_Texture/x64
-/02_DrawTriangle_SysMem/Win32
-/03_DrawTriangle_GpuMem/Win32
-/01_CreateDevice/Win32
-/04_Texture/Win32
-/01_CreateDevice/packages
-/02_DrawTriangle_SysMem/packages
-/03_DrawTriangle_GpuMem/packages
-/03_DrawTriangle_GpuMem/x64
-/04_Texture/packages
-/02_DrawTriangle_SysMem/x64
-/01_CreateDevice/x64
-/04_Texture/x64
-/22_GameEngineFramework/RendererD3D12/packages
-/22_GameEngineFramework/RendererD3D12/x64
-/22_GameEngineFramework/RendererD3D12/x64
-/22_GameEngineFramework/RendererD3D12/.vs
-/22_GameEngineFramework/RendererD3D12/.vs
-/22_GameEngineFramework/RendererD3D12/.vs
-/22_GameEngineFramework/App/x64
-/22_GameEngineFramework/App/.vs
-/22_GameEngineFramework/App/.vs
-/22_GameEngineFramework/App/.vs
-/22_GameEngineFramework/App/.vs
 del_not_needed_folder직업호출하지말것\!\!\!.txt
