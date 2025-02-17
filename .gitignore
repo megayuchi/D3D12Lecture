@@ -1,3 +1,7 @@
+# included folder
+!DirectXTex/DirectXTex/Bin/Desktop_2022/
+!D3D12/
+
 # Prerequisites
 *.d
 
@@ -42,6 +46,10 @@
 # folders
 .vs/
 packages/
+debug/
+release/
+x64/
+win32/
 
 # specific files
 del_not_needed_folder.bat
