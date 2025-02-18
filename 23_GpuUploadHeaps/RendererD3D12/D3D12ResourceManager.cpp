@@ -186,9 +186,9 @@ HRESULT CD3D12ResourceManager::CreateIndexBuffer(DWORD dwIndexNum, D3D12_INDEX_B
 		{
 			// Copy the index data to the index buffer(IndexBuffer on GPU Memory).
 			UINT8* pIndexDataBegin = nullptr;
-			CD3DX12_RANGE writeRange(0, 0);
+			CD3DX12_RANGE readRange(0, 0);
 
-			hr = pIndexBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pIndexDataBegin));
+			hr = pIndexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pIndexDataBegin));
 			if (FAILED(hr))
 			{
 				__debugbreak();
@@ -221,9 +221,9 @@ HRESULT CD3D12ResourceManager::CreateIndexBuffer(DWORD dwIndexNum, D3D12_INDEX_B
 
 			// Copy the index data to the index buffer(UploadBuffer on System Memory).
 			UINT8* pIndexDataBegin = nullptr;
-			CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
+			CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
 
-			hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pIndexDataBegin));
+			hr = pUploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pIndexDataBegin));
 			if (FAILED(hr))
 			{
 				__debugbreak();
@@ -302,7 +302,7 @@ BOOL CD3D12ResourceManager::CreateTexture(ID3D12Resource** ppOutResource, UINT W
 		m_pD3DDevice->GetCopyableFootprints(&Desc, 0, 1, 0, &Footprint, &Rows, &RowSize, &TotalBytes);
 
 		BYTE*	pMappedPtr = nullptr;
-		CD3DX12_RANGE writeRange(0, 0);
+		CD3DX12_RANGE readRange(0, 0);
 
 		UINT64 uploadBufferSize = GetRequiredIntermediateSize(pTexResource, 0, 1);
 
@@ -317,7 +317,7 @@ BOOL CD3D12ResourceManager::CreateTexture(ID3D12Resource** ppOutResource, UINT W
 			__debugbreak();
 		}
 
-		HRESULT hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pMappedPtr));
+		HRESULT hr = pUploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pMappedPtr));
 		if (FAILED(hr))
 			__debugbreak();
 

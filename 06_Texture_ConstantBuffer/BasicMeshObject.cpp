@@ -284,8 +284,8 @@ BOOL CBasicMeshObject::CreateMesh()
 
         // Map and initialize the constant buffer. We don't unmap this until the
         // app closes. Keeping things mapped for the lifetime of the resource is okay.
-        CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
-		if (FAILED(m_pConstantBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&m_pSysConstBufferDefault))))
+        CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
+		if (FAILED(m_pConstantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pSysConstBufferDefault))))
 		{
 			__debugbreak();
 		}

@@ -83,9 +83,9 @@ HRESULT CD3D12ResourceManager::CreateVertexBuffer(UINT SizePerVertex, DWORD dwVe
 		
 		// Copy the triangle data to the vertex buffer.
 		UINT8* pVertexDataBegin = nullptr;
-		CD3DX12_RANGE writeRange(0, 0);        // We do not intend to read from this resource on the CPU.
+		CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
 
-		hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pVertexDataBegin));
+		hr = pUploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin));
 		if (FAILED(hr))
 		{
 			__debugbreak();

@@ -37,8 +37,8 @@ BOOL CSimpleConstantBufferPool::Initialize(ID3D12Device* pD3DDevice, UINT SizePe
 	{
 		__debugbreak();
 	}
-	CD3DX12_RANGE writeRange(0, 0);		// We do not intend to write from this resource on the CPU.
-	m_pResource->Map(0, &writeRange, reinterpret_cast<void**>(&m_pSystemMemAddr));
+	CD3DX12_RANGE readRange(0, 0);		// We do not intend to write from this resource on the CPU.
+	m_pResource->Map(0, &readRange, reinterpret_cast<void**>(&m_pSystemMemAddr));
 
 
 	m_pCBContainerList = new CB_CONTAINER[m_MaxCBVNum];

@@ -596,9 +596,9 @@ void CD3D12Renderer::UpdateTextureWithImage(void* pTexHandle, const BYTE* pSrcBi
 	m_pD3DDevice->GetCopyableFootprints(&Desc, 0, 1, 0, &Footprint, &Rows, &RowSize, &TotalBytes);
 
 	BYTE*	pMappedPtr = nullptr;
-	CD3DX12_RANGE writeRange(0, 0);
+	CD3DX12_RANGE readRange(0, 0);
 
-	HRESULT hr = pUploadBuffer->Map(0, &writeRange, reinterpret_cast<void**>(&pMappedPtr));
+	HRESULT hr = pUploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pMappedPtr));
 	if (FAILED(hr))
 		__debugbreak();
 
